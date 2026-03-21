@@ -1,0 +1,1430 @@
+{
+  "version": "1.0.0",
+  "generated": "2026-03-19",
+  "source": "testing-knowledge-primer + authored",
+  "strategies": [
+    {
+      "id": "unit_isolation",
+      "name": "Unit Test — Isolation",
+      "category": "unit",
+      "description": "Test a single function or method in complete isolation from its dependencies using mocks, stubs, or fakes.",
+      "structural_signals": [
+        "pure function with no side effects",
+        "method with injectable dependencies",
+        "isolated business logic computation",
+        "single responsibility function"
+      ],
+      "applies_when": [
+        "function has clear inputs and outputs",
+        "dependencies can be replaced with test doubles",
+        "testing internal logic independent of infrastructure"
+      ],
+      "avoid_when": [
+        "function is a thin wrapper around an external call",
+        "mocking would replicate the implementation",
+        "integration behavior is what matters"
+      ],
+      "complexity": { "setup": "low", "maintenance": "low", "execution": "fast" },
+      "confidence": "high",
+      "compatible_frameworks": ["pytest", "jest", "vitest"],
+      "trade_offs": [
+        "Does not catch integration bugs",
+        "Over-mocking can make tests brittle",
+        "Fast feedback loop"
+      ],
+      "alternatives": ["unit_parameterized", "integration_api"]
+    },
+    {
+      "id": "unit_parameterized",
+      "name": "Unit Test — Parameterized",
+      "category": "unit",
+      "description": "Run the same test logic against multiple input/output pairs, covering edge cases efficiently without code duplication.",
+      "structural_signals": [
+        "function with many edge cases on same signature",
+        "boundary value analysis needed",
+        "equivalence class partitioning across inputs",
+        "testing isolated function logic with known inputs"
+      ],
+      "applies_when": [
+        "same function needs testing with many input variations",
+        "boundary values and edge cases are well-defined",
+        "test logic is identical across cases"
+      ],
+      "avoid_when": [
+        "each case requires different setup or assertions",
+        "test cases have complex preconditions",
+        "test readability suffers from too many parameters"
+      ],
+      "complexity": { "setup": "low", "maintenance": "low", "execution": "fast" },
+      "confidence": "high",
+      "compatible_frameworks": ["pytest", "jest", "vitest"],
+      "trade_offs": [
+        "Failure messages can be less descriptive",
+        "Adding a case is trivial",
+        "May obscure what each case is testing"
+      ],
+      "alternatives": ["unit_table_driven", "unit_isolation"]
+    },
+    {
+      "id": "unit_table_driven",
+      "name": "Unit Test — Table-Driven",
+      "category": "unit",
+      "description": "Define test cases as a structured table of inputs, expected outputs, and optional descriptions, iterating over each row.",
+      "structural_signals": [
+        "function with combinatorial input space",
+        "need to document expected behavior as a truth table",
+        "testing a parser or transformer with varied inputs"
+      ],
+      "applies_when": [
+        "Go-style testing or when test data is tabular",
+        "cases map naturally to rows in a table",
+        "test matrix is large"
+      ],
+      "avoid_when": [
+        "tests need unique setup per case",
+        "assertions differ structurally between cases"
+      ],
+      "complexity": { "setup": "low", "maintenance": "low", "execution": "fast" },
+      "confidence": "high",
+      "compatible_frameworks": ["pytest", "jest", "vitest"],
+      "trade_offs": [
+        "Very easy to add new cases",
+        "Hard to debug when one row of many fails",
+        "Forces uniform assertion structure"
+      ],
+      "alternatives": ["unit_parameterized", "unit_isolation"]
+    },
+    {
+      "id": "unit_exception",
+      "name": "Unit Test — Exception/Error Path",
+      "category": "unit",
+      "description": "Verify that functions raise correct exceptions, return proper error codes, or handle invalid inputs gracefully.",
+      "structural_signals": [
+        "function has documented error conditions",
+        "validation logic with rejection paths",
+        "error handling and graceful degradation"
+      ],
+      "applies_when": [
+        "function has explicit error handling paths",
+        "API contracts define error responses",
+        "input validation is critical"
+      ],
+      "avoid_when": [
+        "error paths are trivial or auto-generated",
+        "exceptions are caught and silently swallowed upstream"
+      ],
+      "complexity": { "setup": "low", "maintenance": "low", "execution": "fast" },
+      "confidence": "high",
+      "compatible_frameworks": ["pytest", "jest", "vitest"],
+      "trade_offs": [
+        "Catches regressions in error handling",
+        "Can become verbose for many error types",
+        "Essential for robust APIs"
+      ],
+      "alternatives": ["unit_isolation", "api_schema_validation"]
+    },
+    {
+      "id": "unit_async",
+      "name": "Unit Test — Async/Concurrent",
+      "category": "unit",
+      "description": "Test asynchronous functions, coroutines, or concurrent code paths including race conditions and timeout handling.",
+      "structural_signals": [
+        "async function or coroutine",
+        "concurrent access to shared state",
+        "callback-based or promise-based API",
+        "event-driven processing"
+      ],
+      "applies_when": [
+        "code uses async/await, promises, or threads",
+        "race conditions are a concern",
+        "timeout behavior must be verified"
+      ],
+      "avoid_when": [
+        "async is just a thin wrapper",
+        "synchronous equivalent would test the same logic"
+      ],
+      "complexity": { "setup": "medium", "maintenance": "medium", "execution": "fast" },
+      "confidence": "medium",
+      "compatible_frameworks": ["pytest", "jest", "vitest"],
+      "trade_offs": [
+        "Catches timing-dependent bugs",
+        "Non-deterministic failures possible",
+        "Requires async-aware test runner"
+      ],
+      "alternatives": ["unit_isolation", "integration_message_queue"]
+    },
+    {
+      "id": "integration_database",
+      "name": "Integration Test — Database",
+      "category": "integration",
+      "description": "Test code that interacts with a real database, verifying queries, migrations, transactions, and data integrity.",
+      "structural_signals": [
+        "ORM or raw SQL queries",
+        "database migration testing",
+        "transaction rollback behavior",
+        "repository pattern with real data store"
+      ],
+      "applies_when": [
+        "data access layer needs validation against real DB",
+        "complex queries with joins or aggregations",
+        "migration correctness is critical"
+      ],
+      "avoid_when": [
+        "unit tests with mocked repositories suffice",
+        "CI environment cannot provision databases",
+        "query logic is trivially simple"
+      ],
+      "complexity": { "setup": "high", "maintenance": "medium", "execution": "medium" },
+      "confidence": "high",
+      "compatible_frameworks": ["pytest", "jest"],
+      "trade_offs": [
+        "Catches real query bugs that mocks miss",
+        "Slower due to DB setup/teardown",
+        "Requires test database provisioning"
+      ],
+      "alternatives": ["unit_isolation", "integration_api"]
+    },
+    {
+      "id": "integration_api",
+      "name": "Integration Test — API",
+      "category": "integration",
+      "description": "Test HTTP endpoints with a running server, verifying request/response cycles, middleware, authentication, and serialization.",
+      "structural_signals": [
+        "REST or GraphQL endpoint",
+        "middleware chain processing",
+        "authentication and authorization flow",
+        "request validation and response serialization"
+      ],
+      "applies_when": [
+        "API contract must be verified end-to-end",
+        "middleware behavior affects responses",
+        "serialization/deserialization needs testing"
+      ],
+      "avoid_when": [
+        "endpoint is a pass-through to a service",
+        "contract tests cover the interface"
+      ],
+      "complexity": { "setup": "medium", "maintenance": "medium", "execution": "medium" },
+      "confidence": "high",
+      "compatible_frameworks": ["pytest", "jest", "vitest", "playwright"],
+      "trade_offs": [
+        "Tests real HTTP stack",
+        "Slower than unit tests",
+        "Can replace many unit tests of handlers"
+      ],
+      "alternatives": ["contract_consumer_driven", "api_schema_validation"]
+    },
+    {
+      "id": "integration_message_queue",
+      "name": "Integration Test — Message Queue",
+      "category": "integration",
+      "description": "Test producers and consumers against a real or emulated message broker, verifying delivery, ordering, and retry semantics.",
+      "structural_signals": [
+        "publish/subscribe messaging",
+        "event-driven architecture",
+        "message broker interaction",
+        "async event processing pipeline"
+      ],
+      "applies_when": [
+        "message format and routing must be verified",
+        "consumer retry and dead-letter behavior matters",
+        "ordering guarantees need testing"
+      ],
+      "avoid_when": [
+        "messages are fire-and-forget with no business logic",
+        "broker is abstracted behind a simple interface"
+      ],
+      "complexity": { "setup": "high", "maintenance": "high", "execution": "slow" },
+      "confidence": "high",
+      "compatible_frameworks": ["pytest", "jest"],
+      "trade_offs": [
+        "Catches serialization and routing bugs",
+        "Requires broker infrastructure",
+        "Slow and flaky if broker is unreliable"
+      ],
+      "alternatives": ["integration_api", "contract_consumer_driven"]
+    },
+    {
+      "id": "integration_external_service",
+      "name": "Integration Test — External Service",
+      "category": "integration",
+      "description": "Test interactions with third-party APIs or external services using sandboxes, recorded fixtures, or staging environments.",
+      "structural_signals": [
+        "third-party API client",
+        "external service dependency",
+        "webhook handler",
+        "OAuth or external auth flow"
+      ],
+      "applies_when": [
+        "external API contract changes could break your code",
+        "retry and error handling for external calls needs testing",
+        "sandbox or staging environment is available"
+      ],
+      "avoid_when": [
+        "external service has no sandbox",
+        "contract tests already cover the interface",
+        "cost per API call is prohibitive"
+      ],
+      "complexity": { "setup": "high", "maintenance": "high", "execution": "slow" },
+      "confidence": "medium",
+      "compatible_frameworks": ["pytest", "jest"],
+      "trade_offs": [
+        "Catches real integration failures",
+        "Flaky due to network and service availability",
+        "May incur costs"
+      ],
+      "alternatives": ["contract_consumer_driven", "snapshot_api_response"]
+    },
+    {
+      "id": "e2e_happy_path",
+      "name": "E2E Test — Happy Path",
+      "category": "e2e",
+      "description": "Simulate the primary user journey through the application, verifying the most common successful workflow end-to-end.",
+      "structural_signals": [
+        "critical user journey",
+        "main workflow from login to completion",
+        "user story acceptance criteria",
+        "golden path through the application"
+      ],
+      "applies_when": [
+        "core user flow must never break",
+        "acceptance criteria define a clear path",
+        "smoke testing a deployment"
+      ],
+      "avoid_when": [
+        "flow is already covered by integration tests",
+        "UI changes frequently breaking selectors",
+        "test execution time is unacceptable"
+      ],
+      "complexity": { "setup": "high", "maintenance": "high", "execution": "slow" },
+      "confidence": "high",
+      "compatible_frameworks": ["playwright", "cypress", "selenium"],
+      "trade_offs": [
+        "Highest confidence that the system works",
+        "Slowest and most brittle tests",
+        "Should be small in number"
+      ],
+      "alternatives": ["e2e_critical_path", "integration_api"]
+    },
+    {
+      "id": "e2e_critical_path",
+      "name": "E2E Test — Critical Path",
+      "category": "e2e",
+      "description": "Test the critical business paths that, if broken, would cause revenue loss or user-facing outages.",
+      "structural_signals": [
+        "checkout or payment flow",
+        "user registration and onboarding",
+        "data export or compliance workflow",
+        "mission-critical business process"
+      ],
+      "applies_when": [
+        "failure has direct business impact",
+        "regulatory or compliance requirements",
+        "payment or financial transactions involved"
+      ],
+      "avoid_when": [
+        "path is not revenue or compliance critical",
+        "lower-level tests already cover the logic"
+      ],
+      "complexity": { "setup": "high", "maintenance": "high", "execution": "slow" },
+      "confidence": "high",
+      "compatible_frameworks": ["playwright", "cypress", "selenium"],
+      "trade_offs": [
+        "Protects against catastrophic failures",
+        "Expensive to maintain",
+        "Worth the cost for critical paths"
+      ],
+      "alternatives": ["e2e_happy_path", "integration_api"]
+    },
+    {
+      "id": "e2e_cross_browser",
+      "name": "E2E Test — Cross-Browser",
+      "category": "e2e",
+      "description": "Run end-to-end tests across multiple browsers and devices to catch rendering and behavior inconsistencies.",
+      "structural_signals": [
+        "web application with diverse browser support",
+        "CSS or layout-sensitive features",
+        "browser-specific API usage",
+        "mobile and desktop viewport testing"
+      ],
+      "applies_when": [
+        "application must support multiple browsers",
+        "browser-specific bugs have been found before",
+        "responsive design needs validation"
+      ],
+      "avoid_when": [
+        "single browser target (e.g., Electron app)",
+        "API-only service",
+        "visual regression tests cover layout"
+      ],
+      "complexity": { "setup": "high", "maintenance": "high", "execution": "slow" },
+      "confidence": "high",
+      "compatible_frameworks": ["playwright", "cypress", "selenium"],
+      "trade_offs": [
+        "Catches browser-specific bugs",
+        "Multiplies test execution time",
+        "Requires browser infrastructure"
+      ],
+      "alternatives": ["e2e_happy_path", "visual_pixel_diff"]
+    },
+    {
+      "id": "contract_consumer_driven",
+      "name": "Contract Test — Consumer-Driven",
+      "category": "contract",
+      "description": "Consumers define the contract they expect from a provider; the provider verifies it can satisfy all consumer contracts.",
+      "structural_signals": [
+        "microservice consuming another service API",
+        "multiple consumers of the same provider",
+        "API versioning and backward compatibility",
+        "service boundary between teams"
+      ],
+      "applies_when": [
+        "services are owned by different teams",
+        "API changes could break downstream consumers",
+        "deployment independence is desired"
+      ],
+      "avoid_when": [
+        "monolith with no service boundaries",
+        "single consumer with tight coupling",
+        "API changes always coordinated"
+      ],
+      "complexity": { "setup": "medium", "maintenance": "medium", "execution": "fast" },
+      "confidence": "high",
+      "compatible_frameworks": ["pact"],
+      "trade_offs": [
+        "Enables independent deployments",
+        "Requires contract broker infrastructure",
+        "Both sides must participate"
+      ],
+      "alternatives": ["contract_provider", "integration_api"]
+    },
+    {
+      "id": "contract_provider",
+      "name": "Contract Test — Provider Verification",
+      "category": "contract",
+      "description": "Provider service verifies it fulfills the contracts published by its consumers, running against real provider implementation.",
+      "structural_signals": [
+        "API provider serving multiple consumers",
+        "provider-side verification of published contracts",
+        "backward compatibility check before deploy"
+      ],
+      "applies_when": [
+        "provider wants to verify it won't break consumers before deploying",
+        "CI pipeline includes contract verification step",
+        "multiple consumers publish contracts"
+      ],
+      "avoid_when": [
+        "no contracts have been published",
+        "provider has a single tightly coupled consumer"
+      ],
+      "complexity": { "setup": "medium", "maintenance": "medium", "execution": "fast" },
+      "confidence": "high",
+      "compatible_frameworks": ["pact"],
+      "trade_offs": [
+        "Catches breaking changes before deployment",
+        "Depends on consumers publishing accurate contracts",
+        "Requires contract broker"
+      ],
+      "alternatives": ["contract_consumer_driven", "api_schema_validation"]
+    },
+    {
+      "id": "property_based_fuzzing",
+      "name": "Property-Based Test — Fuzzing",
+      "category": "property",
+      "description": "Generate random inputs and verify that universal properties hold across all of them, finding edge cases humans miss.",
+      "structural_signals": [
+        "function with broad input domain",
+        "invariant that must hold for all inputs",
+        "serialization roundtrip",
+        "idempotent operation"
+      ],
+      "applies_when": [
+        "input space is large and edge cases are hard to enumerate",
+        "universal properties can be stated (e.g., encode then decode equals identity)",
+        "parser or serializer needs robustness testing"
+      ],
+      "avoid_when": [
+        "no clear universal property exists",
+        "function has complex preconditions hard to generate for",
+        "test oracle is unavailable"
+      ],
+      "complexity": { "setup": "medium", "maintenance": "low", "execution": "medium" },
+      "confidence": "high",
+      "compatible_frameworks": ["hypothesis", "jest"],
+      "trade_offs": [
+        "Finds surprising edge cases",
+        "Non-deterministic without seed pinning",
+        "Requires thinking in properties not examples"
+      ],
+      "alternatives": ["property_invariant", "unit_parameterized"]
+    },
+    {
+      "id": "property_invariant",
+      "name": "Property-Based Test — Invariant",
+      "category": "property",
+      "description": "Assert that specific invariants (ordering, uniqueness, bounds) hold after any sequence of operations on a stateful system.",
+      "structural_signals": [
+        "stateful data structure with invariants",
+        "sorted collection must stay sorted after mutations",
+        "balance properties in trees or queues",
+        "state machine with known valid states"
+      ],
+      "applies_when": [
+        "system has well-defined invariants",
+        "state transitions are complex",
+        "model-based testing is appropriate"
+      ],
+      "avoid_when": [
+        "invariants are trivial",
+        "stateless functions only",
+        "state space is too large to explore meaningfully"
+      ],
+      "complexity": { "setup": "medium", "maintenance": "medium", "execution": "medium" },
+      "confidence": "high",
+      "compatible_frameworks": ["hypothesis", "pytest"],
+      "trade_offs": [
+        "Catches subtle state corruption",
+        "Harder to write than example-based tests",
+        "Excellent for data structures"
+      ],
+      "alternatives": ["property_based_fuzzing", "unit_parameterized"]
+    },
+    {
+      "id": "mutation_first_order",
+      "name": "Mutation Test — First Order",
+      "category": "mutation",
+      "description": "Introduce single-point mutations (flip operators, remove statements, change constants) to verify that existing tests catch them.",
+      "structural_signals": [
+        "measuring test suite quality beyond code coverage",
+        "verifying tests actually catch bugs",
+        "assessing test effectiveness",
+        "critical code path with high coverage but uncertain quality"
+      ],
+      "applies_when": [
+        "code coverage is high but confidence is low",
+        "want to measure test suite effectiveness",
+        "critical module needs quality assurance"
+      ],
+      "avoid_when": [
+        "test suite is still being built",
+        "code changes too frequently for stable mutation scores",
+        "execution time is prohibitive"
+      ],
+      "complexity": { "setup": "medium", "maintenance": "low", "execution": "slow" },
+      "confidence": "high",
+      "compatible_frameworks": ["pytest"],
+      "trade_offs": [
+        "Objectively measures test quality",
+        "Very slow for large codebases",
+        "Some equivalent mutants create noise"
+      ],
+      "alternatives": ["mutation_higher_order"]
+    },
+    {
+      "id": "mutation_higher_order",
+      "name": "Mutation Test — Higher Order",
+      "category": "mutation",
+      "description": "Combine multiple first-order mutations to find subtle bugs that only manifest when two or more defects interact.",
+      "structural_signals": [
+        "first-order mutation score already high",
+        "complex interactions between code paths",
+        "fault interaction analysis needed"
+      ],
+      "applies_when": [
+        "first-order mutation testing yields diminishing returns",
+        "complex interacting subsystems",
+        "research or safety-critical context"
+      ],
+      "avoid_when": [
+        "first-order mutation score is still low",
+        "exponential blowup makes it impractical",
+        "not a safety-critical system"
+      ],
+      "complexity": { "setup": "high", "maintenance": "medium", "execution": "slow" },
+      "confidence": "medium",
+      "compatible_frameworks": ["pytest"],
+      "trade_offs": [
+        "Finds interaction faults",
+        "Combinatorial explosion of mutants",
+        "Rarely needed outside safety-critical domains"
+      ],
+      "alternatives": ["mutation_first_order"]
+    },
+    {
+      "id": "snapshot_component",
+      "name": "Snapshot Test — Component",
+      "category": "snapshot",
+      "description": "Capture the rendered output of a UI component and compare against a stored snapshot, flagging unintended changes.",
+      "structural_signals": [
+        "UI component rendering",
+        "React/Vue/Svelte component output",
+        "template rendering verification",
+        "component regression detection"
+      ],
+      "applies_when": [
+        "component output should be stable",
+        "catching unintended rendering changes",
+        "rapid development with frequent refactoring"
+      ],
+      "avoid_when": [
+        "component output changes frequently by design",
+        "snapshots become rubber-stamped without review",
+        "dynamic content makes snapshots noisy"
+      ],
+      "complexity": { "setup": "low", "maintenance": "medium", "execution": "fast" },
+      "confidence": "medium",
+      "compatible_frameworks": ["jest", "vitest"],
+      "trade_offs": [
+        "Easy to set up",
+        "Snapshots can be blindly updated",
+        "Noisy for frequently changing components"
+      ],
+      "alternatives": ["visual_pixel_diff", "unit_isolation"]
+    },
+    {
+      "id": "snapshot_api_response",
+      "name": "Snapshot Test — API Response",
+      "category": "snapshot",
+      "description": "Capture API response bodies and compare against stored snapshots to detect unintended schema or data changes.",
+      "structural_signals": [
+        "API response structure verification",
+        "JSON response body comparison",
+        "GraphQL response shape testing",
+        "response format regression detection"
+      ],
+      "applies_when": [
+        "API response format must remain stable",
+        "detecting accidental field removal or type change",
+        "versioned API backward compatibility"
+      ],
+      "avoid_when": [
+        "response contains timestamps or random IDs",
+        "response shape changes often by design",
+        "contract tests already cover the schema"
+      ],
+      "complexity": { "setup": "low", "maintenance": "medium", "execution": "fast" },
+      "confidence": "medium",
+      "compatible_frameworks": ["pytest", "jest", "vitest"],
+      "trade_offs": [
+        "Quick to set up",
+        "Dynamic fields cause false positives",
+        "Good complement to contract tests"
+      ],
+      "alternatives": ["api_schema_validation", "contract_consumer_driven"]
+    },
+    {
+      "id": "load_spike",
+      "name": "Load Test — Spike",
+      "category": "load",
+      "description": "Simulate a sudden traffic spike to test how the system handles rapid scaling and whether it recovers gracefully.",
+      "structural_signals": [
+        "system exposed to viral traffic patterns",
+        "flash sale or event-driven traffic",
+        "autoscaling validation",
+        "sudden burst of concurrent users"
+      ],
+      "applies_when": [
+        "system may face sudden traffic bursts",
+        "autoscaling needs validation",
+        "rate limiting behavior must be verified"
+      ],
+      "avoid_when": [
+        "system has consistent traffic patterns",
+        "infrastructure is fixed-capacity by design"
+      ],
+      "complexity": { "setup": "high", "maintenance": "medium", "execution": "slow" },
+      "confidence": "high",
+      "compatible_frameworks": ["k6", "locust", "artillery"],
+      "trade_offs": [
+        "Reveals scaling bottlenecks",
+        "Requires production-like environment",
+        "Can be expensive to run"
+      ],
+      "alternatives": ["load_stress", "load_capacity"]
+    },
+    {
+      "id": "load_soak",
+      "name": "Load Test — Soak (Endurance)",
+      "category": "load",
+      "description": "Run sustained moderate load over an extended period to detect memory leaks, connection pool exhaustion, and gradual degradation.",
+      "structural_signals": [
+        "long-running service",
+        "suspected memory leak",
+        "connection pool management",
+        "gradual performance degradation over time"
+      ],
+      "applies_when": [
+        "service runs for hours or days without restart",
+        "memory leaks are suspected",
+        "connection or resource pool exhaustion is a concern"
+      ],
+      "avoid_when": [
+        "service is short-lived or serverless",
+        "regular restarts mask the issue",
+        "time budget for testing is limited"
+      ],
+      "complexity": { "setup": "high", "maintenance": "medium", "execution": "slow" },
+      "confidence": "high",
+      "compatible_frameworks": ["k6", "locust", "artillery"],
+      "trade_offs": [
+        "Finds leaks invisible in short tests",
+        "Takes hours to run",
+        "Requires monitoring infrastructure"
+      ],
+      "alternatives": ["load_stress", "load_spike"]
+    },
+    {
+      "id": "load_stress",
+      "name": "Load Test — Stress",
+      "category": "load",
+      "description": "Push the system beyond its expected capacity to find breaking points and verify graceful degradation under extreme load.",
+      "structural_signals": [
+        "finding system breaking point",
+        "graceful degradation verification",
+        "capacity planning",
+        "determining maximum throughput"
+      ],
+      "applies_when": [
+        "need to know system limits",
+        "capacity planning for growth",
+        "verifying circuit breakers and backpressure"
+      ],
+      "avoid_when": [
+        "system capacity is well understood",
+        "no graceful degradation mechanisms exist"
+      ],
+      "complexity": { "setup": "high", "maintenance": "medium", "execution": "slow" },
+      "confidence": "high",
+      "compatible_frameworks": ["k6", "locust", "artillery"],
+      "trade_offs": [
+        "Reveals true system limits",
+        "Can cause cascading failures in shared environments",
+        "Essential for capacity planning"
+      ],
+      "alternatives": ["load_spike", "load_capacity"]
+    },
+    {
+      "id": "load_capacity",
+      "name": "Load Test — Capacity",
+      "category": "load",
+      "description": "Determine the maximum sustainable throughput the system can handle while meeting SLA targets for latency and error rate.",
+      "structural_signals": [
+        "SLA verification under load",
+        "throughput ceiling determination",
+        "performance budget validation",
+        "resource utilization profiling under load"
+      ],
+      "applies_when": [
+        "SLAs define latency and throughput targets",
+        "planning for expected user growth",
+        "validating infrastructure sizing"
+      ],
+      "avoid_when": [
+        "no defined SLAs or performance targets",
+        "system is not yet stable enough for benchmarking"
+      ],
+      "complexity": { "setup": "high", "maintenance": "medium", "execution": "slow" },
+      "confidence": "high",
+      "compatible_frameworks": ["k6", "locust", "artillery"],
+      "trade_offs": [
+        "Provides concrete capacity numbers",
+        "Results depend on environment fidelity",
+        "Must be re-run after significant changes"
+      ],
+      "alternatives": ["load_stress", "load_spike"]
+    },
+    {
+      "id": "security_sast",
+      "name": "Security Test — SAST",
+      "category": "security",
+      "description": "Static analysis of source code to detect security vulnerabilities like SQL injection, XSS, and insecure cryptography without executing the code.",
+      "structural_signals": [
+        "source code with potential injection points",
+        "user input flowing to sensitive sinks",
+        "cryptographic operations in code",
+        "static security scanning in CI pipeline"
+      ],
+      "applies_when": [
+        "code handles user input",
+        "compliance requires static analysis",
+        "shift-left security strategy"
+      ],
+      "avoid_when": [
+        "code has no user-facing input",
+        "false positive rate is unmanageable"
+      ],
+      "complexity": { "setup": "medium", "maintenance": "low", "execution": "fast" },
+      "confidence": "medium",
+      "compatible_frameworks": ["owasp_zap"],
+      "trade_offs": [
+        "Catches vulnerabilities before runtime",
+        "High false positive rate",
+        "No runtime context"
+      ],
+      "alternatives": ["security_dast", "security_dependency_scan"]
+    },
+    {
+      "id": "security_dast",
+      "name": "Security Test — DAST",
+      "category": "security",
+      "description": "Dynamic analysis of a running application by sending malicious requests to discover vulnerabilities like XSS, CSRF, and injection flaws.",
+      "structural_signals": [
+        "web application with user-facing endpoints",
+        "runtime vulnerability scanning",
+        "penetration testing of deployed application",
+        "security assessment of running service"
+      ],
+      "applies_when": [
+        "application is deployed or can be run locally",
+        "need to find runtime vulnerabilities",
+        "compliance requires dynamic scanning"
+      ],
+      "avoid_when": [
+        "no running application to scan",
+        "API-only service better tested with API security tools",
+        "scan would affect production data"
+      ],
+      "complexity": { "setup": "high", "maintenance": "medium", "execution": "slow" },
+      "confidence": "high",
+      "compatible_frameworks": ["owasp_zap"],
+      "trade_offs": [
+        "Finds real exploitable vulnerabilities",
+        "Requires running application",
+        "Can be slow and disruptive"
+      ],
+      "alternatives": ["security_sast", "security_penetration"]
+    },
+    {
+      "id": "security_dependency_scan",
+      "name": "Security Test — Dependency Scan",
+      "category": "security",
+      "description": "Scan project dependencies for known vulnerabilities (CVEs) and license compliance issues.",
+      "structural_signals": [
+        "third-party dependency management",
+        "supply chain security concern",
+        "CVE monitoring for dependencies",
+        "license compliance requirement"
+      ],
+      "applies_when": [
+        "project uses third-party packages",
+        "compliance requires vulnerability tracking",
+        "supply chain attacks are a concern"
+      ],
+      "avoid_when": [
+        "no external dependencies",
+        "dependencies are vendored and audited manually"
+      ],
+      "complexity": { "setup": "low", "maintenance": "low", "execution": "fast" },
+      "confidence": "high",
+      "compatible_frameworks": ["pytest"],
+      "trade_offs": [
+        "Automated CVE detection",
+        "Only finds known vulnerabilities",
+        "Essential for supply chain security"
+      ],
+      "alternatives": ["security_sast", "security_dast"]
+    },
+    {
+      "id": "security_penetration",
+      "name": "Security Test — Penetration",
+      "category": "security",
+      "description": "Simulate real-world attacks against the application to identify exploitable vulnerabilities that automated tools miss.",
+      "structural_signals": [
+        "security-sensitive application",
+        "handling financial or personal data",
+        "public-facing attack surface",
+        "compliance requirement for pen testing"
+      ],
+      "applies_when": [
+        "application handles sensitive data",
+        "regulatory requirements mandate pen testing",
+        "automated scans need human validation"
+      ],
+      "avoid_when": [
+        "application is internal only with low risk",
+        "budget does not allow professional pen testing",
+        "application is in early development"
+      ],
+      "complexity": { "setup": "high", "maintenance": "low", "execution": "slow" },
+      "confidence": "high",
+      "compatible_frameworks": ["owasp_zap"],
+      "trade_offs": [
+        "Finds real-world exploitable issues",
+        "Expensive and time-consuming",
+        "Requires skilled security professionals"
+      ],
+      "alternatives": ["security_dast", "security_sast"]
+    },
+    {
+      "id": "accessibility_wcag_aa",
+      "name": "Accessibility Test — WCAG AA",
+      "category": "accessibility",
+      "description": "Automated checks against WCAG 2.1 AA criteria including color contrast, ARIA labels, keyboard navigation, and semantic HTML.",
+      "structural_signals": [
+        "web application with public users",
+        "WCAG compliance requirement",
+        "UI component accessibility validation",
+        "color contrast and ARIA attribute checking"
+      ],
+      "applies_when": [
+        "legal or ethical accessibility requirements",
+        "public-facing web application",
+        "design system component validation"
+      ],
+      "avoid_when": [
+        "application is API-only",
+        "internal tool with known user capabilities"
+      ],
+      "complexity": { "setup": "medium", "maintenance": "low", "execution": "fast" },
+      "confidence": "medium",
+      "compatible_frameworks": ["axe", "playwright"],
+      "trade_offs": [
+        "Catches common accessibility violations",
+        "Automated tools find ~30% of issues",
+        "Must be supplemented with manual testing"
+      ],
+      "alternatives": ["accessibility_screen_reader"]
+    },
+    {
+      "id": "accessibility_screen_reader",
+      "name": "Accessibility Test — Screen Reader",
+      "category": "accessibility",
+      "description": "Test application usability with screen readers and assistive technologies, verifying reading order, announcements, and focus management.",
+      "structural_signals": [
+        "complex interactive widgets",
+        "dynamic content updates",
+        "single-page application navigation",
+        "screen reader compatibility requirement"
+      ],
+      "applies_when": [
+        "interactive widgets need screen reader support",
+        "dynamic content must be announced properly",
+        "focus management is complex"
+      ],
+      "avoid_when": [
+        "static content with semantic HTML suffices",
+        "automated WCAG checks cover the scope"
+      ],
+      "complexity": { "setup": "high", "maintenance": "high", "execution": "slow" },
+      "confidence": "high",
+      "compatible_frameworks": ["playwright", "axe"],
+      "trade_offs": [
+        "Catches issues automated tools miss",
+        "Requires manual effort and expertise",
+        "Essential for true accessibility"
+      ],
+      "alternatives": ["accessibility_wcag_aa"]
+    },
+    {
+      "id": "visual_pixel_diff",
+      "name": "Visual Regression — Pixel Diff",
+      "category": "visual_regression",
+      "description": "Capture screenshots of UI components or pages and compare pixel-by-pixel against baselines to detect unintended visual changes.",
+      "structural_signals": [
+        "UI with strict visual requirements",
+        "design system component library",
+        "CSS refactoring affecting layout",
+        "visual regression after dependency update"
+      ],
+      "applies_when": [
+        "visual fidelity is critical",
+        "CSS changes may have unintended side effects",
+        "design system needs visual consistency"
+      ],
+      "avoid_when": [
+        "UI changes frequently by design",
+        "anti-aliasing differences cause false positives",
+        "API-only service"
+      ],
+      "complexity": { "setup": "medium", "maintenance": "medium", "execution": "medium" },
+      "confidence": "high",
+      "compatible_frameworks": ["percy", "playwright"],
+      "trade_offs": [
+        "Catches subtle visual regressions",
+        "False positives from rendering differences",
+        "Requires baseline management"
+      ],
+      "alternatives": ["visual_layout_shift", "snapshot_component"]
+    },
+    {
+      "id": "visual_layout_shift",
+      "name": "Visual Regression — Layout Shift",
+      "category": "visual_regression",
+      "description": "Detect unexpected layout shifts and cumulative layout shift (CLS) by measuring element positions before and after rendering.",
+      "structural_signals": [
+        "page load performance optimization",
+        "above-the-fold content stability",
+        "dynamic content injection",
+        "Core Web Vitals CLS metric"
+      ],
+      "applies_when": [
+        "Core Web Vitals are a ranking factor",
+        "content loading causes layout jumps",
+        "ad or dynamic content shifts page elements"
+      ],
+      "avoid_when": [
+        "static page with no dynamic loading",
+        "layout is intentionally fluid"
+      ],
+      "complexity": { "setup": "medium", "maintenance": "low", "execution": "fast" },
+      "confidence": "medium",
+      "compatible_frameworks": ["playwright", "percy"],
+      "trade_offs": [
+        "Catches UX-degrading layout shifts",
+        "Requires real browser rendering",
+        "Good complement to pixel diff"
+      ],
+      "alternatives": ["visual_pixel_diff"]
+    },
+    {
+      "id": "api_schema_validation",
+      "name": "API Test — Schema Validation",
+      "category": "api",
+      "description": "Validate API requests and responses against OpenAPI/JSON Schema definitions to ensure contract compliance.",
+      "structural_signals": [
+        "OpenAPI or Swagger specification",
+        "JSON Schema defined for payloads",
+        "API contract compliance verification",
+        "schema drift detection"
+      ],
+      "applies_when": [
+        "API has a formal schema definition",
+        "multiple consumers rely on the schema",
+        "schema-first development approach"
+      ],
+      "avoid_when": [
+        "no formal schema exists",
+        "schema changes faster than tests can track"
+      ],
+      "complexity": { "setup": "low", "maintenance": "low", "execution": "fast" },
+      "confidence": "high",
+      "compatible_frameworks": ["pytest", "jest", "vitest"],
+      "trade_offs": [
+        "Automated contract verification",
+        "Only validates structure not semantics",
+        "Schema must be maintained"
+      ],
+      "alternatives": ["contract_consumer_driven", "snapshot_api_response"]
+    },
+    {
+      "id": "api_idempotency",
+      "name": "API Test — Idempotency",
+      "category": "api",
+      "description": "Verify that repeating the same API request produces the same result and does not create duplicate side effects.",
+      "structural_signals": [
+        "PUT or DELETE endpoint",
+        "payment or order creation endpoint",
+        "retry-safe API design",
+        "idempotency key handling"
+      ],
+      "applies_when": [
+        "API operations must be safely retried",
+        "network failures may cause duplicate requests",
+        "financial or state-changing operations"
+      ],
+      "avoid_when": [
+        "endpoint is inherently non-idempotent by design",
+        "GET-only read APIs"
+      ],
+      "complexity": { "setup": "medium", "maintenance": "low", "execution": "fast" },
+      "confidence": "high",
+      "compatible_frameworks": ["pytest", "jest"],
+      "trade_offs": [
+        "Catches duplicate-processing bugs",
+        "Simple to implement",
+        "Critical for financial APIs"
+      ],
+      "alternatives": ["integration_api", "api_schema_validation"]
+    },
+    {
+      "id": "api_rate_limit",
+      "name": "API Test — Rate Limiting",
+      "category": "api",
+      "description": "Verify that rate limiting, throttling, and quota enforcement work correctly under various request patterns.",
+      "structural_signals": [
+        "rate-limited API endpoint",
+        "quota enforcement for API keys",
+        "throttling configuration",
+        "429 status code handling"
+      ],
+      "applies_when": [
+        "API has rate limits configured",
+        "abuse prevention is important",
+        "multi-tenant resource isolation"
+      ],
+      "avoid_when": [
+        "no rate limiting is implemented",
+        "internal API with trusted callers only"
+      ],
+      "complexity": { "setup": "medium", "maintenance": "low", "execution": "medium" },
+      "confidence": "high",
+      "compatible_frameworks": ["pytest", "jest", "k6"],
+      "trade_offs": [
+        "Verifies abuse prevention works",
+        "May need timing-sensitive assertions",
+        "Important for public APIs"
+      ],
+      "alternatives": ["load_spike", "integration_api"]
+    },
+    {
+      "id": "agent_prompt_regression",
+      "name": "Agent Test — Prompt Regression",
+      "category": "agent",
+      "description": "Run the same prompts against an agent across versions and measure output variance to detect unintended behavioral changes from prompt or model updates.",
+      "structural_signals": [
+        "LLM-based agent with versioned prompts",
+        "system prompt changes affecting output",
+        "model upgrade causing behavioral drift",
+        "agent output quality regression"
+      ],
+      "applies_when": [
+        "agent prompts are actively iterated",
+        "model version changes are frequent",
+        "output quality must remain above a threshold"
+      ],
+      "avoid_when": [
+        "agent is in early exploration phase",
+        "outputs are inherently creative with no quality baseline"
+      ],
+      "complexity": { "setup": "medium", "maintenance": "medium", "execution": "medium" },
+      "confidence": "medium",
+      "compatible_frameworks": ["pytest", "deepeval", "promptfoo", "giskard"],
+      "trade_offs": [
+        "Catches prompt regressions early",
+        "LLM non-determinism adds noise",
+        "Requires golden dataset curation"
+      ],
+      "alternatives": ["agent_determinism", "agent_hallucination"]
+    },
+    {
+      "id": "agent_tool_call_validation",
+      "name": "Agent Test — Tool Call Validation",
+      "category": "agent",
+      "description": "Verify that an agent selects the correct tools, passes valid parameters, and invokes them in the right order for a given task.",
+      "structural_signals": [
+        "agent with tool/function calling capability",
+        "tool selection accuracy",
+        "parameter extraction from natural language",
+        "tool invocation ordering and dependencies"
+      ],
+      "applies_when": [
+        "agent has access to multiple tools",
+        "correct tool selection is critical for task success",
+        "tool parameters must be accurately extracted"
+      ],
+      "avoid_when": [
+        "agent has no tool access",
+        "single tool with no parameter variation"
+      ],
+      "complexity": { "setup": "medium", "maintenance": "medium", "execution": "medium" },
+      "confidence": "high",
+      "compatible_frameworks": ["pytest", "deepeval", "promptfoo"],
+      "trade_offs": [
+        "Directly validates agent capability",
+        "Tool API changes require test updates",
+        "Can use recorded traces for replay"
+      ],
+      "alternatives": ["agent_chain", "agent_multi_turn"]
+    },
+    {
+      "id": "agent_multi_turn",
+      "name": "Agent Test — Multi-Turn Consistency",
+      "category": "agent",
+      "description": "Test that an agent maintains coherent state, context, and personality across multiple conversation turns without contradiction or amnesia.",
+      "structural_signals": [
+        "conversational agent with memory",
+        "multi-turn dialogue system",
+        "context carryover across messages",
+        "agent state management across turns"
+      ],
+      "applies_when": [
+        "agent engages in multi-turn conversations",
+        "context from prior turns affects responses",
+        "agent must remember user preferences or stated facts"
+      ],
+      "avoid_when": [
+        "agent handles only single-turn queries",
+        "no conversation history is maintained"
+      ],
+      "complexity": { "setup": "high", "maintenance": "medium", "execution": "medium" },
+      "confidence": "medium",
+      "compatible_frameworks": ["pytest", "deepeval", "promptfoo"],
+      "trade_offs": [
+        "Catches context loss and contradiction",
+        "Complex test setup with conversation scripts",
+        "Non-determinism compounds across turns"
+      ],
+      "alternatives": ["agent_prompt_regression", "agent_context_window"]
+    },
+    {
+      "id": "agent_hallucination",
+      "name": "Agent Test — Hallucination Detection",
+      "category": "agent",
+      "description": "Verify that agent outputs are factually grounded in provided context and do not fabricate information, citations, or capabilities.",
+      "structural_signals": [
+        "RAG-based agent with source documents",
+        "factual accuracy requirement",
+        "agent citing sources or references",
+        "knowledge-grounded generation"
+      ],
+      "applies_when": [
+        "agent must only state facts from provided context",
+        "citations must be verifiable",
+        "medical, legal, or financial domain"
+      ],
+      "avoid_when": [
+        "creative generation is the goal",
+        "no source documents to ground against"
+      ],
+      "complexity": { "setup": "high", "maintenance": "medium", "execution": "medium" },
+      "confidence": "medium",
+      "compatible_frameworks": ["deepeval", "giskard", "promptfoo"],
+      "trade_offs": [
+        "Critical for trustworthy AI",
+        "Hallucination detection is itself imperfect",
+        "Requires ground truth reference data"
+      ],
+      "alternatives": ["agent_grounding", "agent_prompt_regression"]
+    },
+    {
+      "id": "agent_determinism",
+      "name": "Agent Test — Determinism",
+      "category": "agent",
+      "description": "Measure output variance across multiple runs of the same prompt to ensure acceptable consistency for production use.",
+      "structural_signals": [
+        "agent output must be reproducible",
+        "temperature and sampling parameter tuning",
+        "production reliability requirement",
+        "variance measurement across runs"
+      ],
+      "applies_when": [
+        "deterministic outputs are required",
+        "agent is used in automated pipelines",
+        "output variance must be quantified"
+      ],
+      "avoid_when": [
+        "creative diversity is desired",
+        "single-run evaluation suffices"
+      ],
+      "complexity": { "setup": "medium", "maintenance": "low", "execution": "medium" },
+      "confidence": "medium",
+      "compatible_frameworks": ["pytest", "deepeval", "promptfoo"],
+      "trade_offs": [
+        "Quantifies reliability",
+        "Requires multiple runs per test case",
+        "Temperature 0 does not guarantee determinism"
+      ],
+      "alternatives": ["agent_prompt_regression"]
+    },
+    {
+      "id": "agent_token_budget",
+      "name": "Agent Test — Token Budget",
+      "category": "agent",
+      "description": "Verify that agent prompts, contexts, and responses stay within token limits to avoid truncation and control costs.",
+      "structural_signals": [
+        "large context injection into prompts",
+        "RAG retrieval with many documents",
+        "token cost optimization",
+        "context window approaching limits"
+      ],
+      "applies_when": [
+        "token costs must be controlled",
+        "context window limits are a concern",
+        "prompt engineering for token efficiency"
+      ],
+      "avoid_when": [
+        "token budget is not a constraint",
+        "model context window is very large relative to usage"
+      ],
+      "complexity": { "setup": "low", "maintenance": "low", "execution": "fast" },
+      "confidence": "high",
+      "compatible_frameworks": ["pytest", "deepeval", "promptfoo"],
+      "trade_offs": [
+        "Prevents silent truncation",
+        "Easy to implement",
+        "Helps control API costs"
+      ],
+      "alternatives": ["agent_context_window"]
+    },
+    {
+      "id": "agent_safety",
+      "name": "Agent Test — Safety/Guardrail",
+      "category": "agent",
+      "description": "Test that an agent refuses harmful requests, resists jailbreak attempts, and stays within defined behavioral boundaries.",
+      "structural_signals": [
+        "public-facing AI agent",
+        "content moderation requirements",
+        "jailbreak resistance testing",
+        "safety guardrail enforcement"
+      ],
+      "applies_when": [
+        "agent is user-facing and could be abused",
+        "content policy must be enforced",
+        "regulatory requirements for AI safety"
+      ],
+      "avoid_when": [
+        "agent is internal and trusted",
+        "no safety-sensitive outputs"
+      ],
+      "complexity": { "setup": "medium", "maintenance": "high", "execution": "medium" },
+      "confidence": "medium",
+      "compatible_frameworks": ["deepeval", "giskard", "promptfoo"],
+      "trade_offs": [
+        "Essential for responsible AI deployment",
+        "Adversarial prompts evolve constantly",
+        "Must be regularly updated"
+      ],
+      "alternatives": ["agent_hallucination", "agent_prompt_regression"]
+    },
+    {
+      "id": "agent_chain",
+      "name": "Agent Test — Chain/Pipeline",
+      "category": "agent",
+      "description": "Test multi-agent pipelines where output of one agent feeds into another, verifying end-to-end pipeline integrity and error propagation.",
+      "structural_signals": [
+        "multi-agent orchestration",
+        "agent pipeline with handoffs",
+        "chained LLM calls",
+        "output of one agent as input to another"
+      ],
+      "applies_when": [
+        "multiple agents are chained together",
+        "pipeline has sequential dependencies",
+        "error in one stage must not corrupt downstream"
+      ],
+      "avoid_when": [
+        "single agent with no chaining",
+        "agents operate independently"
+      ],
+      "complexity": { "setup": "high", "maintenance": "high", "execution": "slow" },
+      "confidence": "medium",
+      "compatible_frameworks": ["pytest", "deepeval"],
+      "trade_offs": [
+        "Validates end-to-end pipeline",
+        "Failures hard to localize across agents",
+        "Expensive to run"
+      ],
+      "alternatives": ["agent_tool_call_validation", "agent_multi_turn"]
+    },
+    {
+      "id": "agent_stream_validation",
+      "name": "Agent Test — Stream Validation",
+      "category": "agent",
+      "description": "Verify that streamed agent responses are complete, properly chunked, and that partial outputs are valid at every point.",
+      "structural_signals": [
+        "server-sent events or WebSocket streaming",
+        "chunked response delivery",
+        "streaming token output",
+        "partial response rendering"
+      ],
+      "applies_when": [
+        "agent responses are streamed to clients",
+        "partial responses are rendered progressively",
+        "stream interruption must be handled"
+      ],
+      "avoid_when": [
+        "responses are delivered in a single batch",
+        "streaming is not used"
+      ],
+      "complexity": { "setup": "medium", "maintenance": "medium", "execution": "medium" },
+      "confidence": "high",
+      "compatible_frameworks": ["pytest", "playwright"],
+      "trade_offs": [
+        "Catches streaming-specific bugs",
+        "Requires async test infrastructure",
+        "Important for real-time UX"
+      ],
+      "alternatives": ["agent_latency_profiling", "integration_api"]
+    },
+    {
+      "id": "agent_latency_profiling",
+      "name": "Agent Test — Latency Profiling",
+      "category": "agent",
+      "description": "Measure response time distribution across agent calls, identifying p50/p95/p99 latencies and detecting timeout-prone prompts.",
+      "structural_signals": [
+        "agent response time SLA",
+        "latency-sensitive user interaction",
+        "timeout configuration validation",
+        "performance regression in agent responses"
+      ],
+      "applies_when": [
+        "agent has latency SLAs",
+        "user experience depends on response speed",
+        "comparing latency across model versions"
+      ],
+      "avoid_when": [
+        "latency is not a concern",
+        "batch processing with no real-time requirement"
+      ],
+      "complexity": { "setup": "medium", "maintenance": "low", "execution": "medium" },
+      "confidence": "high",
+      "compatible_frameworks": ["pytest", "k6", "promptfoo"],
+      "trade_offs": [
+        "Quantifies performance characteristics",
+        "Model provider latency varies",
+        "Essential for SLA compliance"
+      ],
+      "alternatives": ["load_capacity", "agent_token_budget"]
+    },
+    {
+      "id": "agent_context_window",
+      "name": "Agent Test — Context Window Management",
+      "category": "agent",
+      "description": "Test agent behavior as conversation history approaches context window limits, verifying graceful summarization or truncation.",
+      "structural_signals": [
+        "long conversation sessions",
+        "context window nearing capacity",
+        "summarization or truncation strategy",
+        "conversation history management"
+      ],
+      "applies_when": [
+        "agents handle long conversations",
+        "context summarization is implemented",
+        "behavior at window limits must be predictable"
+      ],
+      "avoid_when": [
+        "conversations are always short",
+        "context window is effectively unlimited for use case"
+      ],
+      "complexity": { "setup": "high", "maintenance": "medium", "execution": "slow" },
+      "confidence": "medium",
+      "compatible_frameworks": ["pytest", "deepeval"],
+      "trade_offs": [
+        "Catches context overflow issues",
+        "Expensive to test with large contexts",
+        "Critical for production agents"
+      ],
+      "alternatives": ["agent_token_budget", "agent_multi_turn"]
+    },
+    {
+      "id": "agent_grounding",
+      "name": "Agent Test — Grounding/Citation Accuracy",
+      "category": "agent",
+      "description": "Verify that agent-generated citations, references, and source attributions accurately correspond to the content they claim to reference.",
+      "structural_signals": [
+        "RAG with citation requirements",
+        "source attribution in responses",
+        "reference verification",
+        "knowledge base lookup accuracy"
+      ],
+      "applies_when": [
+        "agent must cite sources accurately",
+        "legal or compliance requirement for traceability",
+        "knowledge base retrieval must be verifiable"
+      ],
+      "avoid_when": [
+        "no citation requirement",
+        "creative or conversational use case"
+      ],
+      "complexity": { "setup": "high", "maintenance": "medium", "execution": "medium" },
+      "confidence": "medium",
+      "compatible_frameworks": ["deepeval", "giskard", "promptfoo"],
+      "trade_offs": [
+        "Ensures trustworthy attributions",
+        "Requires ground truth corpus",
+        "Citation verification is computationally expensive"
+      ],
+      "alternatives": ["agent_hallucination", "agent_prompt_regression"]
+    }
+  ]
+}

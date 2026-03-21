@@ -1,0 +1,382 @@
+{
+  "version": "1.0.0",
+  "generated": "2026-03-19",
+  "source": "framework-comparison + authored",
+  "frameworks": [
+    {
+      "id": "pytest",
+      "name": "pytest",
+      "language": "python",
+      "categories": ["unit", "integration", "e2e", "property", "agent", "api", "mutation"],
+      "strengths": [
+        "fixture system with dependency injection",
+        "parametrize decorator for data-driven tests",
+        "rich plugin ecosystem (1000+ plugins)",
+        "async support via pytest-asyncio",
+        "powerful assertion introspection",
+        "marker system for test categorization"
+      ],
+      "weaknesses": [
+        "slow startup for very large suites (10k+ tests)",
+        "fixture scope can cause subtle shared-state bugs",
+        "magic conftest.py resolution can be confusing"
+      ],
+      "best_for": ["python projects", "API testing", "agent testing", "data pipelines", "scientific computing"],
+      "integration_support": ["CI/CD", "coverage", "allure", "html reports", "junit xml", "tox"],
+      "agent_testing_support": "native"
+    },
+    {
+      "id": "jest",
+      "name": "Jest",
+      "language": "javascript",
+      "categories": ["unit", "integration", "snapshot", "api"],
+      "strengths": [
+        "zero-config for most JS projects",
+        "built-in snapshot testing",
+        "parallel test execution",
+        "built-in code coverage",
+        "auto-mocking of modules",
+        "watch mode with intelligent re-running"
+      ],
+      "weaknesses": [
+        "ESM support still maturing",
+        "slow for large monorepos",
+        "memory-heavy due to per-test isolation"
+      ],
+      "best_for": ["React applications", "Node.js backends", "component libraries"],
+      "integration_support": ["CI/CD", "coverage", "junit xml", "html reports"],
+      "agent_testing_support": "plugin"
+    },
+    {
+      "id": "vitest",
+      "name": "Vitest",
+      "language": "javascript",
+      "categories": ["unit", "integration", "snapshot", "api"],
+      "strengths": [
+        "native ESM support",
+        "Vite-powered — extremely fast",
+        "Jest-compatible API",
+        "built-in TypeScript support",
+        "in-source testing",
+        "concurrent test execution"
+      ],
+      "weaknesses": [
+        "younger ecosystem than Jest",
+        "some Jest plugins not yet ported",
+        "Vite dependency for full speed"
+      ],
+      "best_for": ["Vite-based projects", "modern ESM codebases", "TypeScript projects"],
+      "integration_support": ["CI/CD", "coverage", "junit xml", "html reports"],
+      "agent_testing_support": "plugin"
+    },
+    {
+      "id": "playwright",
+      "name": "Playwright",
+      "language": "javascript",
+      "categories": ["e2e", "visual_regression", "accessibility", "api"],
+      "strengths": [
+        "multi-browser support (Chromium, Firefox, WebKit)",
+        "auto-wait eliminates flaky selectors",
+        "network interception and mocking",
+        "trace viewer for debugging",
+        "codegen for test recording",
+        "parallel execution with browser contexts"
+      ],
+      "weaknesses": [
+        "heavyweight browser downloads",
+        "learning curve for advanced features",
+        "overkill for simple API tests"
+      ],
+      "best_for": ["web application E2E testing", "cross-browser testing", "visual regression"],
+      "integration_support": ["CI/CD", "allure", "html reports", "trace viewer", "screenshots"],
+      "agent_testing_support": "plugin"
+    },
+    {
+      "id": "cypress",
+      "name": "Cypress",
+      "language": "javascript",
+      "categories": ["e2e", "integration", "api"],
+      "strengths": [
+        "time-travel debugging",
+        "real-time reloading",
+        "automatic waiting",
+        "network stubbing",
+        "dashboard service for CI",
+        "excellent documentation"
+      ],
+      "weaknesses": [
+        "single-tab limitation",
+        "no native multi-browser support (Chromium-based only)",
+        "same-origin limitation for iframes",
+        "slower than Playwright for large suites"
+      ],
+      "best_for": ["single-page applications", "teams new to E2E testing", "component testing"],
+      "integration_support": ["CI/CD", "dashboard", "screenshots", "videos", "junit xml"],
+      "agent_testing_support": "none"
+    },
+    {
+      "id": "selenium",
+      "name": "Selenium WebDriver",
+      "language": "multi",
+      "categories": ["e2e"],
+      "strengths": [
+        "widest browser support",
+        "multi-language bindings (Python, Java, JS, C#, Ruby)",
+        "W3C standard protocol",
+        "largest community and ecosystem",
+        "Selenium Grid for parallel execution"
+      ],
+      "weaknesses": [
+        "verbose API compared to modern alternatives",
+        "flaky without explicit waits",
+        "slow test execution",
+        "no built-in network interception"
+      ],
+      "best_for": ["legacy web applications", "multi-language teams", "Selenium Grid infrastructure"],
+      "integration_support": ["CI/CD", "Selenium Grid", "BrowserStack", "Sauce Labs"],
+      "agent_testing_support": "none"
+    },
+    {
+      "id": "k6",
+      "name": "k6",
+      "language": "javascript",
+      "categories": ["load", "api"],
+      "strengths": [
+        "developer-friendly JavaScript scripting",
+        "low resource usage (Go-based engine)",
+        "built-in protocols (HTTP, WebSocket, gRPC)",
+        "threshold-based pass/fail",
+        "cloud execution option",
+        "excellent metrics and output formats"
+      ],
+      "weaknesses": [
+        "no browser-level load testing (use k6 browser for that)",
+        "JavaScript runtime is not Node.js (limited npm)",
+        "limited built-in reporting"
+      ],
+      "best_for": ["API load testing", "performance CI gates", "developer-driven performance testing"],
+      "integration_support": ["CI/CD", "Grafana", "InfluxDB", "Prometheus", "Datadog", "JSON output"],
+      "agent_testing_support": "plugin"
+    },
+    {
+      "id": "locust",
+      "name": "Locust",
+      "language": "python",
+      "categories": ["load"],
+      "strengths": [
+        "pure Python — no DSL to learn",
+        "distributed execution",
+        "real-time web UI for monitoring",
+        "event-based — very efficient",
+        "highly customizable user behavior"
+      ],
+      "weaknesses": [
+        "single-protocol focus (HTTP-centric)",
+        "less sophisticated metrics than k6",
+        "web UI limited for headless CI"
+      ],
+      "best_for": ["Python teams", "custom load patterns", "distributed load generation"],
+      "integration_support": ["CI/CD", "CSV export", "web UI", "distributed mode"],
+      "agent_testing_support": "none"
+    },
+    {
+      "id": "artillery",
+      "name": "Artillery",
+      "language": "javascript",
+      "categories": ["load", "api"],
+      "strengths": [
+        "YAML-based scenario definition",
+        "built-in protocol support (HTTP, WebSocket, Socket.IO)",
+        "Playwright integration for browser load tests",
+        "cloud execution option",
+        "scenario-based testing"
+      ],
+      "weaknesses": [
+        "YAML can become unwieldy for complex scenarios",
+        "less performant than k6 at high concurrency",
+        "cloud features require paid plan"
+      ],
+      "best_for": ["scenario-based load testing", "WebSocket load testing", "quick performance checks"],
+      "integration_support": ["CI/CD", "Datadog", "CloudWatch", "JSON reports"],
+      "agent_testing_support": "none"
+    },
+    {
+      "id": "owasp_zap",
+      "name": "OWASP ZAP",
+      "language": "multi",
+      "categories": ["security"],
+      "strengths": [
+        "free and open source",
+        "active and passive scanning",
+        "API scanning support",
+        "CI/CD integration via Docker",
+        "extensible via scripts and add-ons",
+        "OWASP-maintained"
+      ],
+      "weaknesses": [
+        "high false positive rate",
+        "slow full scans",
+        "complex configuration for targeted scans",
+        "heavy resource consumption"
+      ],
+      "best_for": ["DAST scanning", "API security testing", "CI security gates"],
+      "integration_support": ["CI/CD", "Docker", "Jenkins", "GitHub Actions", "HTML/XML/JSON reports"],
+      "agent_testing_support": "none"
+    },
+    {
+      "id": "axe",
+      "name": "axe-core",
+      "language": "javascript",
+      "categories": ["accessibility"],
+      "strengths": [
+        "industry standard for automated accessibility testing",
+        "low false positive rate",
+        "browser extension for manual testing",
+        "integrates with all major test frameworks",
+        "WCAG 2.1 AA and AAA coverage",
+        "fast execution"
+      ],
+      "weaknesses": [
+        "only catches ~30% of accessibility issues",
+        "cannot test screen reader behavior",
+        "requires DOM access"
+      ],
+      "best_for": ["WCAG compliance automation", "CI accessibility gates", "component library testing"],
+      "integration_support": ["Playwright", "Cypress", "Selenium", "Jest", "CI/CD"],
+      "agent_testing_support": "none"
+    },
+    {
+      "id": "percy",
+      "name": "Percy (BrowserStack)",
+      "language": "multi",
+      "categories": ["visual_regression"],
+      "strengths": [
+        "intelligent visual diffing with anti-aliasing tolerance",
+        "cross-browser visual testing",
+        "responsive viewport testing",
+        "snapshot stabilization (waits for network idle)",
+        "review workflow with approvals",
+        "SDK integrations for all major frameworks"
+      ],
+      "weaknesses": [
+        "paid service (free tier limited)",
+        "cloud dependency for rendering",
+        "snapshot upload latency in CI"
+      ],
+      "best_for": ["design system visual regression", "cross-browser visual testing", "component library QA"],
+      "integration_support": ["Playwright", "Cypress", "Selenium", "Storybook", "CI/CD"],
+      "agent_testing_support": "none"
+    },
+    {
+      "id": "pact",
+      "name": "Pact",
+      "language": "multi",
+      "categories": ["contract"],
+      "strengths": [
+        "consumer-driven contract testing",
+        "multi-language support (JS, Java, Python, Go, Ruby, .NET)",
+        "Pact Broker for contract management",
+        "can-i-deploy safety check",
+        "bi-directional contract testing",
+        "provider state management"
+      ],
+      "weaknesses": [
+        "requires both consumer and provider participation",
+        "Pact Broker adds infrastructure",
+        "learning curve for provider states",
+        "limited to request-response interactions (v3 adds messages)"
+      ],
+      "best_for": ["microservice architectures", "cross-team API contracts", "independent deployment verification"],
+      "integration_support": ["CI/CD", "Pact Broker", "PactFlow", "all major CI platforms"],
+      "agent_testing_support": "none"
+    },
+    {
+      "id": "hypothesis",
+      "name": "Hypothesis",
+      "language": "python",
+      "categories": ["property", "unit"],
+      "strengths": [
+        "sophisticated input generation strategies",
+        "automatic shrinking to minimal failing case",
+        "stateful testing for state machines",
+        "database of failing examples for replay",
+        "composable strategies",
+        "excellent documentation"
+      ],
+      "weaknesses": [
+        "Python only",
+        "can be slow for complex strategies",
+        "requires property-based thinking mindset shift"
+      ],
+      "best_for": ["Python property-based testing", "parser testing", "data structure invariants", "serialization roundtrips"],
+      "integration_support": ["pytest", "CI/CD", "coverage"],
+      "agent_testing_support": "none"
+    },
+    {
+      "id": "deepeval",
+      "name": "DeepEval",
+      "language": "python",
+      "categories": ["agent"],
+      "strengths": [
+        "purpose-built for LLM evaluation",
+        "built-in metrics (hallucination, relevancy, toxicity, bias)",
+        "pytest integration",
+        "conversation testing support",
+        "custom metric framework",
+        "dataset management"
+      ],
+      "weaknesses": [
+        "relatively new ecosystem",
+        "some metrics require LLM calls (cost)",
+        "limited non-Python support"
+      ],
+      "best_for": ["LLM output evaluation", "RAG testing", "hallucination detection", "agent regression testing"],
+      "integration_support": ["pytest", "CI/CD", "Confident AI dashboard"],
+      "agent_testing_support": "native"
+    },
+    {
+      "id": "promptfoo",
+      "name": "promptfoo",
+      "language": "javascript",
+      "categories": ["agent"],
+      "strengths": [
+        "multi-provider comparison (OpenAI, Anthropic, local models)",
+        "YAML-based eval configuration",
+        "built-in assertion types",
+        "web UI for result comparison",
+        "red teaming capabilities",
+        "caching for fast re-evaluation"
+      ],
+      "weaknesses": [
+        "JavaScript/TypeScript focused",
+        "YAML configs can become complex",
+        "custom metrics require JavaScript"
+      ],
+      "best_for": ["prompt comparison across models", "agent evaluation", "red teaming", "model selection"],
+      "integration_support": ["CI/CD", "web UI", "JSON/CSV output"],
+      "agent_testing_support": "native"
+    },
+    {
+      "id": "giskard",
+      "name": "Giskard",
+      "language": "python",
+      "categories": ["agent", "security"],
+      "strengths": [
+        "AI model testing and vulnerability scanning",
+        "automatic adversarial test generation",
+        "LLM-specific vulnerability detection",
+        "bias and fairness testing",
+        "hallucination detection",
+        "integration with ML pipelines"
+      ],
+      "weaknesses": [
+        "heavier setup than simpler eval tools",
+        "focused on ML/AI models specifically",
+        "some features require Giskard Hub"
+      ],
+      "best_for": ["AI safety testing", "LLM vulnerability scanning", "bias detection", "model compliance"],
+      "integration_support": ["pytest", "CI/CD", "Giskard Hub", "MLflow"],
+      "agent_testing_support": "native"
+    }
+  ]
+}

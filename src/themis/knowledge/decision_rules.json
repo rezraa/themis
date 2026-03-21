@@ -1,0 +1,412 @@
+{
+  "version": "1.0.0",
+  "generated": "2026-03-19",
+  "source": "testing-decision-rules + authored",
+  "rules": [
+    {
+      "id": "rule_001",
+      "structural_signal": "testing isolated function logic with known inputs",
+      "recommended_strategy": "unit_parameterized",
+      "recommended_framework": "pytest",
+      "priority": 1,
+      "alternatives": ["unit_table_driven"],
+      "rationale": "Parameterized tests cover multiple inputs efficiently with minimal code duplication"
+    },
+    {
+      "id": "rule_002",
+      "structural_signal": "pure function with no side effects and clear input output",
+      "recommended_strategy": "unit_isolation",
+      "recommended_framework": "pytest",
+      "priority": 1,
+      "alternatives": ["unit_parameterized"],
+      "rationale": "Pure functions are the ideal unit test target — complete isolation, deterministic results"
+    },
+    {
+      "id": "rule_003",
+      "structural_signal": "function with many edge cases on same signature",
+      "recommended_strategy": "unit_parameterized",
+      "recommended_framework": "pytest",
+      "priority": 1,
+      "alternatives": ["unit_table_driven", "property_based_fuzzing"],
+      "rationale": "Parameterized tests let you enumerate edge cases without repeating test logic"
+    },
+    {
+      "id": "rule_004",
+      "structural_signal": "combinatorial input space with tabular expected outputs",
+      "recommended_strategy": "unit_table_driven",
+      "recommended_framework": "pytest",
+      "priority": 1,
+      "alternatives": ["unit_parameterized"],
+      "rationale": "Table-driven tests make combinatorial coverage explicit and easy to extend"
+    },
+    {
+      "id": "rule_005",
+      "structural_signal": "error handling paths and exception conditions",
+      "recommended_strategy": "unit_exception",
+      "recommended_framework": "pytest",
+      "priority": 2,
+      "alternatives": ["unit_isolation"],
+      "rationale": "Dedicated error path tests ensure graceful failure under invalid inputs"
+    },
+    {
+      "id": "rule_006",
+      "structural_signal": "async function or coroutine with await points",
+      "recommended_strategy": "unit_async",
+      "recommended_framework": "pytest",
+      "priority": 2,
+      "alternatives": ["unit_isolation"],
+      "rationale": "Async code needs async-aware test runners to properly exercise await points and concurrency"
+    },
+    {
+      "id": "rule_007",
+      "structural_signal": "database queries or ORM operations against a real store",
+      "recommended_strategy": "integration_database",
+      "recommended_framework": "pytest",
+      "priority": 2,
+      "alternatives": ["unit_isolation"],
+      "rationale": "Real database tests catch SQL/ORM bugs that mocks cannot detect"
+    },
+    {
+      "id": "rule_008",
+      "structural_signal": "REST or GraphQL endpoint handler with middleware",
+      "recommended_strategy": "integration_api",
+      "recommended_framework": "pytest",
+      "priority": 2,
+      "alternatives": ["contract_consumer_driven", "api_schema_validation"],
+      "rationale": "API integration tests verify the full HTTP stack including middleware, serialization, and auth"
+    },
+    {
+      "id": "rule_009",
+      "structural_signal": "publish subscribe messaging or event-driven processing",
+      "recommended_strategy": "integration_message_queue",
+      "recommended_framework": "pytest",
+      "priority": 3,
+      "alternatives": ["integration_api", "contract_consumer_driven"],
+      "rationale": "Message queue tests verify delivery semantics, ordering, and retry behavior"
+    },
+    {
+      "id": "rule_010",
+      "structural_signal": "third-party API client or external service dependency",
+      "recommended_strategy": "integration_external_service",
+      "recommended_framework": "pytest",
+      "priority": 3,
+      "alternatives": ["contract_consumer_driven", "snapshot_api_response"],
+      "rationale": "External service tests catch integration failures that mocks hide"
+    },
+    {
+      "id": "rule_011",
+      "structural_signal": "critical user journey through the full application",
+      "recommended_strategy": "e2e_happy_path",
+      "recommended_framework": "playwright",
+      "priority": 3,
+      "alternatives": ["e2e_critical_path"],
+      "rationale": "Happy path E2E tests verify the primary user flow works end to end"
+    },
+    {
+      "id": "rule_012",
+      "structural_signal": "payment flow or revenue-critical business process",
+      "recommended_strategy": "e2e_critical_path",
+      "recommended_framework": "playwright",
+      "priority": 1,
+      "alternatives": ["e2e_happy_path", "integration_api"],
+      "rationale": "Revenue-critical paths warrant the cost of E2E tests — failure here means lost money"
+    },
+    {
+      "id": "rule_013",
+      "structural_signal": "web application supporting multiple browsers",
+      "recommended_strategy": "e2e_cross_browser",
+      "recommended_framework": "playwright",
+      "priority": 3,
+      "alternatives": ["e2e_happy_path", "visual_pixel_diff"],
+      "rationale": "Cross-browser tests catch rendering and API differences across browser engines"
+    },
+    {
+      "id": "rule_014",
+      "structural_signal": "microservice API consumed by multiple downstream services",
+      "recommended_strategy": "contract_consumer_driven",
+      "recommended_framework": "pact",
+      "priority": 2,
+      "alternatives": ["contract_provider", "api_schema_validation"],
+      "rationale": "Consumer-driven contracts let teams deploy independently without breaking each other"
+    },
+    {
+      "id": "rule_015",
+      "structural_signal": "API provider verifying backward compatibility before deploy",
+      "recommended_strategy": "contract_provider",
+      "recommended_framework": "pact",
+      "priority": 2,
+      "alternatives": ["contract_consumer_driven"],
+      "rationale": "Provider verification catches breaking changes before they reach consumers"
+    },
+    {
+      "id": "rule_016",
+      "structural_signal": "serialization roundtrip or encoding decoding symmetry",
+      "recommended_strategy": "property_based_fuzzing",
+      "recommended_framework": "hypothesis",
+      "priority": 2,
+      "alternatives": ["unit_parameterized"],
+      "rationale": "Property-based tests find edge cases in encoders/decoders that humans never think of"
+    },
+    {
+      "id": "rule_017",
+      "structural_signal": "stateful data structure with ordering or uniqueness invariants",
+      "recommended_strategy": "property_invariant",
+      "recommended_framework": "hypothesis",
+      "priority": 2,
+      "alternatives": ["property_based_fuzzing"],
+      "rationale": "Invariant testing catches subtle state corruption after sequences of operations"
+    },
+    {
+      "id": "rule_018",
+      "structural_signal": "input space too large to enumerate but universal property exists",
+      "recommended_strategy": "property_based_fuzzing",
+      "recommended_framework": "hypothesis",
+      "priority": 2,
+      "alternatives": ["unit_parameterized", "property_invariant"],
+      "rationale": "Fuzzing explores the input space far more thoroughly than hand-written examples"
+    },
+    {
+      "id": "rule_019",
+      "structural_signal": "measuring test suite quality beyond code coverage",
+      "recommended_strategy": "mutation_first_order",
+      "recommended_framework": "pytest",
+      "priority": 4,
+      "alternatives": ["mutation_higher_order"],
+      "rationale": "Mutation testing objectively measures whether tests catch real bugs, not just execute code"
+    },
+    {
+      "id": "rule_020",
+      "structural_signal": "UI component rendering output stability",
+      "recommended_strategy": "snapshot_component",
+      "recommended_framework": "jest",
+      "priority": 3,
+      "alternatives": ["visual_pixel_diff"],
+      "rationale": "Component snapshots catch unintended rendering changes with zero effort"
+    },
+    {
+      "id": "rule_021",
+      "structural_signal": "API response body format regression detection",
+      "recommended_strategy": "snapshot_api_response",
+      "recommended_framework": "pytest",
+      "priority": 3,
+      "alternatives": ["api_schema_validation", "contract_consumer_driven"],
+      "rationale": "Response snapshots catch accidental field removal or type changes"
+    },
+    {
+      "id": "rule_022",
+      "structural_signal": "system exposed to sudden traffic spikes or viral load",
+      "recommended_strategy": "load_spike",
+      "recommended_framework": "k6",
+      "priority": 2,
+      "alternatives": ["load_stress", "load_capacity"],
+      "rationale": "Spike tests reveal whether autoscaling and rate limiting handle sudden bursts"
+    },
+    {
+      "id": "rule_023",
+      "structural_signal": "long-running service suspected of memory leaks",
+      "recommended_strategy": "load_soak",
+      "recommended_framework": "k6",
+      "priority": 2,
+      "alternatives": ["load_stress"],
+      "rationale": "Soak tests find memory leaks and resource exhaustion invisible in short test runs"
+    },
+    {
+      "id": "rule_024",
+      "structural_signal": "finding system breaking point and maximum throughput",
+      "recommended_strategy": "load_stress",
+      "recommended_framework": "k6",
+      "priority": 2,
+      "alternatives": ["load_capacity", "load_spike"],
+      "rationale": "Stress tests push beyond limits to find breaking points and verify graceful degradation"
+    },
+    {
+      "id": "rule_025",
+      "structural_signal": "verifying SLA compliance under expected load",
+      "recommended_strategy": "load_capacity",
+      "recommended_framework": "k6",
+      "priority": 2,
+      "alternatives": ["load_stress"],
+      "rationale": "Capacity tests determine maximum throughput while meeting latency SLAs"
+    },
+    {
+      "id": "rule_026",
+      "structural_signal": "source code handling user input with potential injection",
+      "recommended_strategy": "security_sast",
+      "recommended_framework": "owasp_zap",
+      "priority": 2,
+      "alternatives": ["security_dast"],
+      "rationale": "Static analysis catches injection vulnerabilities before code runs"
+    },
+    {
+      "id": "rule_027",
+      "structural_signal": "running web application needing runtime vulnerability scan",
+      "recommended_strategy": "security_dast",
+      "recommended_framework": "owasp_zap",
+      "priority": 2,
+      "alternatives": ["security_sast", "security_penetration"],
+      "rationale": "Dynamic scanning finds exploitable vulnerabilities in running applications"
+    },
+    {
+      "id": "rule_028",
+      "structural_signal": "third-party dependencies needing CVE monitoring",
+      "recommended_strategy": "security_dependency_scan",
+      "recommended_framework": "pytest",
+      "priority": 1,
+      "alternatives": ["security_sast"],
+      "rationale": "Dependency scanning is low-cost high-value — catches known vulnerabilities automatically"
+    },
+    {
+      "id": "rule_029",
+      "structural_signal": "public web application requiring WCAG compliance",
+      "recommended_strategy": "accessibility_wcag_aa",
+      "recommended_framework": "axe",
+      "priority": 2,
+      "alternatives": ["accessibility_screen_reader"],
+      "rationale": "Automated WCAG checks catch the most common accessibility violations"
+    },
+    {
+      "id": "rule_030",
+      "structural_signal": "CSS refactoring or design system component visual consistency",
+      "recommended_strategy": "visual_pixel_diff",
+      "recommended_framework": "percy",
+      "priority": 3,
+      "alternatives": ["visual_layout_shift", "snapshot_component"],
+      "rationale": "Pixel diff catches subtle visual regressions that functional tests miss"
+    },
+    {
+      "id": "rule_031",
+      "structural_signal": "OpenAPI schema defined for API contract compliance",
+      "recommended_strategy": "api_schema_validation",
+      "recommended_framework": "pytest",
+      "priority": 1,
+      "alternatives": ["contract_consumer_driven", "snapshot_api_response"],
+      "rationale": "Schema validation is fast and automated when a formal spec exists"
+    },
+    {
+      "id": "rule_032",
+      "structural_signal": "state-changing API endpoint that must be safely retried",
+      "recommended_strategy": "api_idempotency",
+      "recommended_framework": "pytest",
+      "priority": 2,
+      "alternatives": ["integration_api"],
+      "rationale": "Idempotency tests prevent duplicate processing bugs that are hard to debug in production"
+    },
+    {
+      "id": "rule_033",
+      "structural_signal": "LLM agent with versioned prompts being iterated",
+      "recommended_strategy": "agent_prompt_regression",
+      "recommended_framework": "deepeval",
+      "priority": 1,
+      "alternatives": ["agent_determinism", "agent_hallucination"],
+      "rationale": "Prompt regression is the first test every agent needs — without it, prompt changes are blind"
+    },
+    {
+      "id": "rule_034",
+      "structural_signal": "agent with multiple tools and function calling capability",
+      "recommended_strategy": "agent_tool_call_validation",
+      "recommended_framework": "pytest",
+      "priority": 1,
+      "alternatives": ["agent_chain", "agent_multi_turn"],
+      "rationale": "Tool call validation catches the most common agent failure: calling the wrong tool with wrong params"
+    },
+    {
+      "id": "rule_035",
+      "structural_signal": "conversational agent maintaining state across turns",
+      "recommended_strategy": "agent_multi_turn",
+      "recommended_framework": "deepeval",
+      "priority": 2,
+      "alternatives": ["agent_context_window", "agent_prompt_regression"],
+      "rationale": "Multi-turn tests catch amnesia and self-contradiction that erode user trust"
+    },
+    {
+      "id": "rule_036",
+      "structural_signal": "RAG agent that must ground answers in provided documents",
+      "recommended_strategy": "agent_hallucination",
+      "recommended_framework": "deepeval",
+      "priority": 1,
+      "alternatives": ["agent_grounding"],
+      "rationale": "Hallucination detection is critical for any agent making factual claims from sources"
+    },
+    {
+      "id": "rule_037",
+      "structural_signal": "agent used in automated pipeline where output is parsed by code",
+      "recommended_strategy": "agent_determinism",
+      "recommended_framework": "promptfoo",
+      "priority": 1,
+      "alternatives": ["agent_prompt_regression"],
+      "rationale": "Downstream code breaks on variance — determinism testing quantifies reliability"
+    },
+    {
+      "id": "rule_038",
+      "structural_signal": "agent with large context injection approaching token limits",
+      "recommended_strategy": "agent_token_budget",
+      "recommended_framework": "pytest",
+      "priority": 2,
+      "alternatives": ["agent_context_window"],
+      "rationale": "Token budget tests prevent silent truncation and control API costs"
+    },
+    {
+      "id": "rule_039",
+      "structural_signal": "public-facing AI agent needing content safety guardrails",
+      "recommended_strategy": "agent_safety",
+      "recommended_framework": "giskard",
+      "priority": 1,
+      "alternatives": ["agent_hallucination"],
+      "rationale": "Safety testing is non-negotiable for user-facing agents — failure is a liability"
+    },
+    {
+      "id": "rule_040",
+      "structural_signal": "multi-agent pipeline with sequential handoffs between agents",
+      "recommended_strategy": "agent_chain",
+      "recommended_framework": "pytest",
+      "priority": 2,
+      "alternatives": ["agent_tool_call_validation"],
+      "rationale": "Chain tests verify data flows correctly and errors propagate gracefully across agents"
+    },
+    {
+      "id": "rule_041",
+      "structural_signal": "agent responses streamed via SSE or WebSocket to client",
+      "recommended_strategy": "agent_stream_validation",
+      "recommended_framework": "pytest",
+      "priority": 2,
+      "alternatives": ["agent_latency_profiling"],
+      "rationale": "Stream validation catches chunk corruption and incomplete responses that batch tests miss"
+    },
+    {
+      "id": "rule_042",
+      "structural_signal": "agent with response time SLA or latency-sensitive interaction",
+      "recommended_strategy": "agent_latency_profiling",
+      "recommended_framework": "promptfoo",
+      "priority": 2,
+      "alternatives": ["load_capacity"],
+      "rationale": "Latency profiling establishes baselines and detects performance regressions"
+    },
+    {
+      "id": "rule_043",
+      "structural_signal": "agent handling long conversations near context window capacity",
+      "recommended_strategy": "agent_context_window",
+      "recommended_framework": "deepeval",
+      "priority": 2,
+      "alternatives": ["agent_token_budget", "agent_multi_turn"],
+      "rationale": "Context window tests verify graceful degradation as history grows"
+    },
+    {
+      "id": "rule_044",
+      "structural_signal": "RAG agent providing citations that must reference real sources",
+      "recommended_strategy": "agent_grounding",
+      "recommended_framework": "deepeval",
+      "priority": 1,
+      "alternatives": ["agent_hallucination"],
+      "rationale": "Grounding tests verify the citation chain — claims must trace back to real sources"
+    },
+    {
+      "id": "rule_045",
+      "structural_signal": "rate-limited API endpoint with quota enforcement",
+      "recommended_strategy": "api_rate_limit",
+      "recommended_framework": "k6",
+      "priority": 3,
+      "alternatives": ["load_spike", "integration_api"],
+      "rationale": "Rate limit tests verify abuse prevention and multi-tenant resource isolation"
+    }
+  ]
+}

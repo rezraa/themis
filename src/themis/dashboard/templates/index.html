@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<!-- Copyright (c) 2026 Reza Malik. Licensed under the Apache License, Version 2.0. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Themis — Testing Dashboard</title>
+
+  <!-- Inline SVG favicon: scales of justice -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230a0a0f'/%3E%3Cg stroke='%2300aaff' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='32' y1='12' x2='32' y2='52'/%3E%3Cline x1='16' y1='20' x2='48' y2='20'/%3E%3Cpath d='M16 20 L10 36 Q16 44 22 36 Z' fill='%2300ff8833'/%3E%3Cpath d='M48 20 L42 36 Q48 44 54 36 Z' fill='%23ff336633'/%3E%3Cline x1='24' y1='52' x2='40' y2='52'/%3E%3C/g%3E%3C/svg%3E" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+
+<div class="dashboard">
+
+  <!-- ================================================================== -->
+  <!-- Header                                                             -->
+  <!-- ================================================================== -->
+  <header class="header">
+    <div class="header-brand">
+      <pre class="header-ascii">
+ _____ _                   _
+|_   _| |__   ___ _ __ ___ (_)___
+  | | | '_ \ / _ \ '_ ` _ \| / __|
+  | | | | | |  __/ | | | | | \__ \
+  |_| |_| |_|\___|_| |_| |_|_|___/</pre>
+      <div>
+        <div class="header-title">Themis</div>
+        <div class="header-subtitle">Real-time Testing Dashboard</div>
+      </div>
+    </div>
+    <div class="header-controls">
+      <div class="connection-status">
+        <span class="status-dot" id="status-dot"></span>
+        <span id="status-text">DISCONNECTED</span>
+      </div>
+      <button class="sound-toggle" id="sound-toggle">SND OFF</button>
+    </div>
+  </header>
+
+  <!-- ================================================================== -->
+  <!-- Stats Bar                                                          -->
+  <!-- ================================================================== -->
+  <section class="stats-bar">
+    <div class="stat-card">
+      <span class="stat-label">Total Tests</span>
+      <span class="stat-value total" id="stat-total">0</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Passed</span>
+      <span class="stat-value pass" id="stat-pass">0</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Failed</span>
+      <span class="stat-value fail" id="stat-fail">0</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Warnings</span>
+      <span class="stat-value warn" id="stat-warn">0</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Pass Rate</span>
+      <span class="stat-value info" id="stat-rate">0%</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Avg Latency</span>
+      <span class="stat-value info" id="stat-latency">0ms</span>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- Charts Row                                                         -->
+  <!-- ================================================================== -->
+  <section class="charts-row">
+    <div class="chart-container">
+      <span class="chart-title">Latency Over Time</span>
+      <canvas class="chart-canvas" id="latency-chart"></canvas>
+    </div>
+    <div class="chart-container">
+      <span class="chart-title">Verdict Distribution</span>
+      <canvas class="chart-canvas" id="donut-chart"></canvas>
+    </div>
+    <div class="chart-container">
+      <span class="chart-title">Token Usage</span>
+      <canvas class="chart-canvas" id="token-chart"></canvas>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- Filter Bar                                                         -->
+  <!-- ================================================================== -->
+  <div class="filter-bar">
+    <button class="filter-btn active" data-verdict="ALL">ALL</button>
+    <button class="filter-btn" data-verdict="PASS">PASS</button>
+    <button class="filter-btn" data-verdict="FAIL">FAIL</button>
+    <button class="filter-btn" data-verdict="WARN">WARN</button>
+    <input class="search-input" id="search-input" type="text" placeholder="Search test name..." />
+  </div>
+
+  <!-- ================================================================== -->
+  <!-- Results Stream                                                     -->
+  <!-- ================================================================== -->
+  <div class="results-panel" id="results-panel">
+    <div class="empty-state">
+      <div class="empty-state-icon">&#x2696;</div>
+      <div class="empty-state-text">Awaiting test results...</div>
+    </div>
+  </div>
+
+</div>
+
+<script src="/static/dashboard.js"></script>
+</body>
+</html>
