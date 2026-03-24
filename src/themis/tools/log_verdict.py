@@ -60,38 +60,30 @@ def _write_to_graph(
 
     content_json = json.dumps(record)
 
-    try:
-        conn.execute(
-            "CREATE (m:memories {"
-            "  memory_type: $type,"
-            "  content: $content,"
-            "  timestamp: $ts,"
-            "  source: $source"
-            "})",
-            parameters={
-                "type": "test_verdict",
-                "content": content_json,
-                "ts": timestamp,
-                "source": f"themis:{mode}",
-            },
-        )
-    except Exception as exc:
-        # If the parameterised query fails (schema variation), try string
-        # interpolation as fallback — Kuzu/LadybugDB schema may differ.
-        logger.warning("Parameterised insert failed (%s), trying fallback", exc)
-        try:
-            escaped = content_json.replace("'", "\\'")
-            conn.execute(
-                f"CREATE (m:memories {{"
-                f"  memory_type: 'test_verdict',"
-                f"  content: '{escaped}',"
-                f"  timestamp: '{timestamp}',"
-                f"  source: 'themis:{mode}'"
-                f"}})"
-            )
-        except Exception as exc2:
-            logger.error("Graph write failed: %s", exc2)
-            raise
+    conn.execute(
+        "CREATE (m:memories {"
+        "  id: $id,"
+        "  content: $content,"
+        "  memory_type: $type,"
+        "  status: $status,"
+        "  outcome: $outcome,"
+        "  agent: $agent,"
+        "  project: $project,"
+        "  confidence: $confidence,"
+        "  timestamp: $ts"
+        "})",
+        parameters={
+            "id": verdict_id,
+            "content": content_json,
+            "type": "test_verdict",
+            "status": "active",
+            "outcome": verdict,
+            "agent": "themis",
+            "project": f"themis:{mode}",
+            "confidence": 1.0,
+            "ts": timestamp,
+        },
+    )
 
     return verdict_id
 
