@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 # Valid modes and verdicts
 # ---------------------------------------------------------------------------
 
-_VALID_MODES = {"agent_test", "strategy_review", "coverage_analysis"}
+_VALID_MODES = {"agent_test", "strategy_review", "coverage_analysis", "code_review", "audit"}
 _VALID_VERDICTS = {"pass", "fail", "warning"}
 
 
@@ -103,7 +103,8 @@ def log_verdict(
 
     Args:
         mode: Context of the verdict — one of ``"agent_test"``,
-            ``"strategy_review"``, ``"coverage_analysis"``.
+            ``"strategy_review"``, ``"coverage_analysis"``,
+            ``"code_review"``, ``"audit"``.
         system_tested: Identifier for the system/agent that was tested.
         verdict: Overall verdict — one of ``"pass"``, ``"fail"``,
             ``"warning"``.

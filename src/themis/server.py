@@ -42,7 +42,7 @@ mcp = FastMCP("themis", instructions=(
 @mcp.tool()
 def plan_test_strategy(
     system_description: str,
-    structural_signals: Union[list[str], str, None] = None,
+    structural_signals: Union[list[str], str],
     constraints: Union[dict[str, Any], str, None] = None,
     conn: Any = None,
 ) -> dict:
@@ -147,7 +147,7 @@ async def run_agent_test(
 def evaluate_coverage(
     test_descriptions: Union[list[str], str],
     system_description: str,
-    structural_signals: Union[list[str], str, None] = None,
+    structural_signals: Union[list[str], str],
     conn: Any = None,
 ) -> dict:
     """Evaluate how well existing tests cover a system.

@@ -158,7 +158,7 @@ def _infer_category(test_desc: dict[str, Any]) -> str:
 def evaluate_coverage(
     test_descriptions: list[dict],
     system_description: str,
-    structural_signals: list[str] | None = None,
+    structural_signals: list[str],
     conn: object = None,
 ) -> dict:
     """Analyze test coverage gaps against the knowledge base.
