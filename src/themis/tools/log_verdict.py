@@ -58,7 +58,7 @@ def _write_to_graph(
     raw = json.dumps(record, sort_keys=True)
     verdict_id = "v-" + hashlib.sha256(raw.encode()).hexdigest()[:12]
 
-    content_json = json.dumps(record)
+    content_json = "JSON:" + json.dumps(record)
 
     conn.execute(
         "CREATE (m:memories {"
