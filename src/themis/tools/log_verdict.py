@@ -12,7 +12,7 @@ import logging
 from datetime import datetime, timezone
 from typing import Any
 
-from themis.tools._shared import append_verdict, coerce, emit_event
+from themis.tools._shared import append_verdict, coerce_or_raise, emit_event
 
 logger = logging.getLogger(__name__)
 
@@ -123,7 +123,7 @@ def log_verdict(
         Dict with keys: logged, verdict_id, mode, system_tested, verdict,
         timestamp, storage_mode.
     """
-    details = coerce(details, dict) or {}
+    details = coerce_or_raise(details, dict, {})
 
     # Validate mode
     effective_mode = mode.lower().strip()

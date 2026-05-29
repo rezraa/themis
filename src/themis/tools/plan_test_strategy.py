@@ -16,6 +16,10 @@ from typing import Any
 
 from themis.tools._shared import coerce, emit_event, get_knowledge
 
+# Sentinel distinguishing "argument omitted" from an explicit None/empty value,
+# so a missing required signal fails loud instead of silently defaulting.
+_MISSING = object()
+
 # ---------------------------------------------------------------------------
 # Agent testing signal keywords — triggers agent_patterns in output
 # ---------------------------------------------------------------------------
@@ -135,10 +139,11 @@ def _language_ok(strategy: dict[str, Any], language: str) -> bool:
 # ---------------------------------------------------------------------------
 
 def plan_test_strategy(
-    system_description: str,
-    structural_signals: list[str],
+    system_description: Any = _MISSING,
+    structural_signals: Any = _MISSING,
     constraints: dict | None = None,
     conn: object = None,
+    **extra: Any,
 ) -> dict:
     """Recommend testing strategies based on structural signals and constraints.
 
@@ -147,6 +152,8 @@ def plan_test_strategy(
             API, agent, or code under test.
         structural_signals: Agent-identified signals, e.g.
             ["tool-use", "multi-turn", "latency-sensitive", "rest-api"].
+            Required — a missing value raises rather than silently defaulting,
+            since an empty signal set would mask a caller bug.
         constraints: Optional dict with keys like ``language``,
             ``max_setup_complexity`` ("low"/"medium"/"high"/"extreme"),
             ``max_strategies`` (int), ``framework_preference`` (str).
@@ -156,8 +163,30 @@ def plan_test_strategy(
         Dict with keys: matched_rules, recommended_strategies, frameworks,
         alternatives, filtered_out, agent_patterns (if agent signals found).
     """
-    structural_signals = coerce(structural_signals, list) or []
-    constraints = coerce(constraints, dict) or {}
+    # Recover a lone stray string -> system_description when the caller sent
+    # exactly one extra string and system_description was not supplied.
+    if system_description is _MISSING and extra:
+        stray_strings = [k for k, v in extra.items() if isinstance(v, str)]
+        if len(extra) == 1 and len(stray_strings) == 1:
+            system_description = extra.pop(stray_strings[0])
+    if extra:
+        raise TypeError(
+            "plan_test_strategy() got unexpected keyword argument(s): "
+            + ", ".join(sorted(extra))
+        )
+    if system_description is _MISSING:
+        raise TypeError(
+            "plan_test_strategy() missing required argument 'system_description'"
+        )
+    if structural_signals is _MISSING:
+        raise TypeError(
+            "plan_test_strategy requires 'structural_signals' (a list of "
+            "agent-identified testing signals); refusing to default it to [] "
+            "as that would mask a caller bug"
+        )
+
+    structural_signals = coerce(structural_signals, list, default=[])
+    constraints = coerce(constraints, dict, default={})
 
     kb = get_knowledge(conn)
 
