@@ -21,55 +21,32 @@ from themis.adapters.base import (
     AgentAdapter,
     AgentResponse,
 )
+from themis.adapters.registry import ADAPTERS
 from themis.tools._shared import coerce, emit_event
 from themis.tools.judge_output import judge_output
 
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# Adapter registry — maps adapter_type strings to classes
+# Adapter resolution — the ONE registry is themis.adapters.registry.ADAPTERS
 # ---------------------------------------------------------------------------
-
-_ADAPTER_REGISTRY: dict[str, type[AgentAdapter]] = {}
-
-
-def register_adapter(name: str, cls: type[AgentAdapter]) -> None:
-    """Register an adapter class under a string name."""
-    _ADAPTER_REGISTRY[name.lower()] = cls
 
 
 def _get_adapter_class(adapter_type: str) -> type[AgentAdapter]:
-    """Resolve an adapter type string to a class.
+    """Resolve an adapter-type string to its class via the canonical registry.
 
-    Tries the registry first, then attempts dynamic import from
-    ``themis.adapters.<adapter_type>``.
+    A single O(1) dict access against ``themis.adapters.registry.ADAPTERS`` —
+    the one registry of built-in adapters. No dynamic ``importlib`` (the Othrys
+    tool sandbox blocks that module, so the dynamic lookup made this tool fail
+    to compile) and no second module-local registry to drift from it.
     """
-    key = adapter_type.lower()
-
-    if key in _ADAPTER_REGISTRY:
-        return _ADAPTER_REGISTRY[key]
-
-    # Dynamic import — convention: themis.adapters.<name>.<Name>Adapter
-    try:
-        import importlib
-        module = importlib.import_module(f"themis.adapters.{key}")
-        # Find the first AgentAdapter subclass in the module
-        for attr_name in dir(module):
-            attr = getattr(module, attr_name)
-            if (
-                isinstance(attr, type)
-                and issubclass(attr, AgentAdapter)
-                and attr is not AgentAdapter
-            ):
-                _ADAPTER_REGISTRY[key] = attr
-                return attr
-    except (ImportError, AttributeError):
-        pass
-
-    raise ValueError(
-        f"Unknown adapter type '{adapter_type}'. "
-        f"Available: {list(_ADAPTER_REGISTRY.keys())}"
-    )
+    cls = ADAPTERS.get(adapter_type.lower().strip())
+    if cls is None:
+        raise ValueError(
+            f"Unknown adapter type '{adapter_type}'. "
+            f"Available: {sorted(ADAPTERS)}"
+        )
+    return cls
 
 
 # ---------------------------------------------------------------------------
@@ -198,7 +175,7 @@ async def _run_single_test(
 # Main tool
 # ---------------------------------------------------------------------------
 
-async def run_agent_test(
+def run_agent_test(
     agent_endpoint: str,
     adapter_type: str,
     test_cases: list[dict],
@@ -228,6 +205,29 @@ async def run_agent_test(
     Returns:
         Dict with keys: results, summary, timestamp.
     """
+    # Sync entry: the Othrys summon path calls func(**kwargs) WITHOUT awaiting,
+    # so an async tool would hand back an un-awaited coroutine (this tool was
+    # dead via summon). Drive the async engine to a real result. Sync tools run
+    # in a worker thread off any live loop, so asyncio.run() owns a fresh loop.
+    return asyncio.run(
+        _run_agent_test_async(
+            agent_endpoint=agent_endpoint,
+            adapter_type=adapter_type,
+            test_cases=test_cases,
+            config=config,
+            conn=conn,
+        )
+    )
+
+
+async def _run_agent_test_async(
+    agent_endpoint: str,
+    adapter_type: str,
+    test_cases: list[dict],
+    config: dict | None = None,
+    conn: object = None,
+) -> dict:
+    """Async engine behind :func:`run_agent_test` (see it for the contract)."""
     test_cases = coerce(test_cases, list) or []
     config = coerce(config, dict) or {}
 

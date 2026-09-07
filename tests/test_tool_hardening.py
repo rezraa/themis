@@ -91,31 +91,34 @@ class TestPlanTestStrategyHardening:
         # `coerce(...) or {}` and crash on `.get()`.
         result = plan_test_strategy(
             system_description="REST API",
-            structural_signals=["rest-api"],
+            matched_signal_ids=["rest-api"],
             constraints="production",
         )
         assert isinstance(result, dict)
 
-    def test_missing_structural_signals_raises(self):
-        with pytest.raises(TypeError, match="structural_signals"):
+    def test_missing_matched_signal_ids_raises(self):
+        with pytest.raises(TypeError, match="matched_signal_ids"):
             plan_test_strategy(system_description="REST API")
 
     def test_missing_system_description_raises(self):
         with pytest.raises(TypeError):
-            plan_test_strategy(structural_signals=["rest-api"])
+            plan_test_strategy(matched_signal_ids=["rest-api"])
 
-    def test_lone_stray_string_maps_to_system_description(self):
-        # Exactly one stray string + no system_description -> recovered.
-        result = plan_test_strategy(
-            structural_signals=["rest-api"],
-            target="A REST API under test",
-        )
-        assert isinstance(result, dict)
+    def test_stray_string_no_longer_remapped_to_system_description(self):
+        # system_description is now a truly-required param (no default) so the
+        # advertised signature honestly lists it in `required`; a stray string can
+        # no longer silently stand in for it — the call fails loud and the caller
+        # learns the real parameter name instead of having a guess substituted.
+        with pytest.raises(TypeError):
+            plan_test_strategy(
+                matched_signal_ids=["rest-api"],
+                target="A REST API under test",
+            )
 
     def test_genuinely_unknown_kwarg_raises(self):
         with pytest.raises(TypeError):
             plan_test_strategy(
                 system_description="x",
-                structural_signals=["rest-api"],
+                matched_signal_ids=["rest-api"],
                 bogus={"not": "a string"},
             )

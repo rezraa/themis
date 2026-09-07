@@ -50,7 +50,7 @@ class TestOwnFieldReasoning:
     def test_recommended_strategy_carries_real_complexity_and_frameworks(self, accessor_ids):
         res = plan_test_strategy(
             system_description="a pure function under test",
-            structural_signals=accessor_ids["strategy"] + [accessor_ids["pattern"]],
+            matched_signal_ids=accessor_ids["strategy"] + [accessor_ids["pattern"]],
         )
         assert res["retrieval_state"] in ("hit", "low_confidence")
         rec = res["recommended_strategies"]
@@ -67,7 +67,7 @@ class TestOwnFieldReasoning:
     def test_top_level_frameworks_no_longer_empty(self, accessor_ids):
         res = plan_test_strategy(
             system_description="a pure function under test",
-            structural_signals=accessor_ids["strategy"],
+            matched_signal_ids=accessor_ids["strategy"],
         )
         assert res["frameworks"], "top-level frameworks was always [] before the field fix"
         assert "pytest" in res["frameworks"]
@@ -77,7 +77,7 @@ class TestOwnFieldReasoning:
         applies_when/avoid_when/trade_offs are the single why-source."""
         res = plan_test_strategy(
             system_description="a pure function under test",
-            structural_signals=accessor_ids["strategy"],
+            matched_signal_ids=accessor_ids["strategy"],
         )
         assert "matched_rules" not in res
 
@@ -88,7 +88,7 @@ class TestAgentPatternCorpus:
     def test_agent_patterns_carry_rich_corpus_fields(self, accessor_ids):
         res = plan_test_strategy(
             system_description="an agent that chains sub-agents",
-            structural_signals=accessor_ids["strategy"] + [accessor_ids["pattern"]],
+            matched_signal_ids=accessor_ids["strategy"] + [accessor_ids["pattern"]],
         )
         assert res["agent_pattern_state"] in ("hit", "low_confidence")
         assert "agent_patterns" in res and res["agent_patterns"]
@@ -128,7 +128,7 @@ class TestFailClosed:
     def test_unrecognised_id_abstains_on_both_legs(self):
         res = plan_test_strategy(
             system_description="anything",
-            structural_signals=["sig-deadbeef0000"],
+            matched_signal_ids=["sig-deadbeef0000"],
         )
         assert res["retrieval_state"] == "no_match"
         assert res["agent_pattern_state"] == "no_match"
@@ -143,7 +143,7 @@ class TestFailClosed:
         # Each id is recognised by exactly one view, so NEITHER is unmatched overall.
         res = plan_test_strategy(
             system_description="mixed",
-            structural_signals=accessor_ids["strategy"] + [accessor_ids["pattern"]],
+            matched_signal_ids=accessor_ids["strategy"] + [accessor_ids["pattern"]],
         )
         assert res["unmatched_signals"] == []
 
@@ -151,30 +151,33 @@ class TestFailClosed:
 class TestMcpBoundaryContractPreserved:
     """The two required params stay honestly required (test_tool_hardening contract)."""
 
-    def test_missing_structural_signals_raises(self):
-        with pytest.raises(TypeError, match="structural_signals"):
+    def test_missing_matched_signal_ids_raises(self):
+        with pytest.raises(TypeError, match="matched_signal_ids"):
             plan_test_strategy(system_description="x")
 
     def test_missing_system_description_raises(self):
         with pytest.raises(TypeError):
-            plan_test_strategy(structural_signals=["sig-1"])
+            plan_test_strategy(matched_signal_ids=["sig-1"])
 
-    def test_lone_stray_string_maps_to_system_description(self):
-        res = plan_test_strategy(structural_signals=["sig-1"], target="A system")
-        assert isinstance(res, dict)
+    def test_stray_string_no_longer_remapped_to_system_description(self):
+        # system_description is now truly required (no default) so the advertised
+        # signature honestly lists it in `required`; a stray string can no longer
+        # silently stand in for it — the call fails loud instead.
+        with pytest.raises(TypeError):
+            plan_test_strategy(matched_signal_ids=["sig-1"], target="A system")
 
     def test_unknown_kwarg_raises(self):
         with pytest.raises(TypeError):
             plan_test_strategy(
                 system_description="x",
-                structural_signals=["sig-1"],
+                matched_signal_ids=["sig-1"],
                 bogus={"not": "a string"},
             )
 
     def test_wrong_type_constraints_does_not_crash(self):
         res = plan_test_strategy(
             system_description="x",
-            structural_signals=["sig-1"],
+            matched_signal_ids=["sig-1"],
             constraints="production",
         )
         assert isinstance(res, dict)

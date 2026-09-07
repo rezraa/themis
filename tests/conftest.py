@@ -31,19 +31,6 @@ def sample_system_description() -> str:
 
 
 @pytest.fixture()
-def sample_structural_signals() -> list[str]:
-    """Structural signals matching the sample system description."""
-    return [
-        "user_input_validation",
-        "database_writes",
-        "async_pipeline",
-        "rate_limited",
-        "auth_required",
-        "schema_validation",
-    ]
-
-
-@pytest.fixture()
 def sample_agent_test_cases() -> list[dict]:
     """Sample test cases for agent testing."""
     return [

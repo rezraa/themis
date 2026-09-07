@@ -61,7 +61,7 @@ class TestReachableCorpusGaps:
         res = evaluate_coverage(
             test_descriptions=_TESTS,
             system_description=_SYS,
-            structural_signals=accessor_ids["strategy"],
+            matched_signal_ids=accessor_ids["strategy"],
         )
         assert res["retrieval_state"] in ("hit", "low_confidence")
         missing = res["missing_strategies"]
@@ -79,7 +79,7 @@ class TestReachableCorpusGaps:
         res = evaluate_coverage(
             test_descriptions=_TESTS,
             system_description=_SYS,
-            structural_signals=accessor_ids["strategy"] + [accessor_ids["pattern"]],
+            matched_signal_ids=accessor_ids["strategy"] + [accessor_ids["pattern"]],
         )
         # A corpus-sourced risk area names a real strategy or agent-pattern node —
         # not merely one of the 9 hardcoded rubric categories.
@@ -99,7 +99,7 @@ class TestReachableCorpusGaps:
         res = evaluate_coverage(
             test_descriptions=_TESTS,
             system_description=_SYS,
-            structural_signals=accessor_ids["strategy"] + [accessor_ids["pattern"]],
+            matched_signal_ids=accessor_ids["strategy"] + [accessor_ids["pattern"]],
         )
         assert res["agent_pattern_state"] in ("hit", "low_confidence")
         block = next((r for r in res["risk_areas"]
@@ -115,7 +115,7 @@ class TestDefaultCategoriesDemotedToWeights:
         res = evaluate_coverage(
             test_descriptions=_TESTS,
             system_description=_SYS,
-            structural_signals=accessor_ids["strategy"],
+            matched_signal_ids=accessor_ids["strategy"],
         )
         cbc = res["coverage_by_category"]
         # "unit" is a corpus strategy category the hardcoded rubric never held.
@@ -132,7 +132,7 @@ class TestDefaultCategoriesDemotedToWeights:
         res = evaluate_coverage(
             test_descriptions=_TESTS,
             system_description=_SYS,
-            structural_signals=[],
+            matched_signal_ids=[],
         )
         cbc = res["coverage_by_category"]
         for name, weight in _DEFAULT_CATEGORIES.items():
@@ -148,7 +148,7 @@ class TestFailClosed:
         res = evaluate_coverage(
             test_descriptions=_TESTS,
             system_description=_SYS,
-            structural_signals=["sig-deadbeef0000"],
+            matched_signal_ids=["sig-deadbeef0000"],
         )
         assert res["retrieval_state"] == "no_match"
         assert res["agent_pattern_state"] == "no_match"
@@ -163,7 +163,7 @@ class TestFailClosed:
         res = evaluate_coverage(
             test_descriptions=_TESTS,
             system_description=_SYS,
-            structural_signals=[],
+            matched_signal_ids=[],
         )
         assert res["retrieval_state"] == "no_match"
         assert res["missing_strategies"] == []

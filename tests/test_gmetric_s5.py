@@ -87,7 +87,7 @@ class TestPlanTestStrategyContract:
         assert len(strat) == 2
         res = plan_test_strategy(
             system_description="a pure function under test",
-            structural_signals=strat,
+            matched_signal_ids=strat,
         )
         assert "matched_rules" not in res
         # Retrieval still reasons over each node's OWN fields (unchanged from S3).
@@ -97,7 +97,7 @@ class TestPlanTestStrategyContract:
         assert "pytest" in res["frameworks"]
 
     def test_no_match_abstains_without_matched_rules(self):
-        res = plan_test_strategy(system_description="x", structural_signals=["sig-deadbeef0000"])
+        res = plan_test_strategy(system_description="x", matched_signal_ids=["sig-deadbeef0000"])
         assert res["retrieval_state"] == "no_match"
         assert res["recommended_strategies"] == []
         assert "matched_rules" not in res

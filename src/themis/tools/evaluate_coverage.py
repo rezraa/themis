@@ -232,7 +232,7 @@ def _covered_by_tests(node: dict, all_test_text: str) -> bool:
 def evaluate_coverage(
     test_descriptions: list[dict],
     system_description: str,
-    structural_signals: list[str],
+    matched_signal_ids: list[str],
     k: int = 10,
     conn: object = None,
 ) -> dict:
@@ -242,8 +242,8 @@ def evaluate_coverage(
         test_descriptions: List of dicts describing existing tests, each with
             ``name``, ``category`` (normalised), and ``what_it_tests``.
         system_description: Description of the system under test — context/telemetry
-            only (the reachable corpus is driven by ``structural_signals``).
-        structural_signals: The matched SIGNAL IDS the caller recognised against
+            only (the reachable corpus is driven by ``matched_signal_ids``).
+        matched_signal_ids: The matched SIGNAL IDS recognised against
             ``get_signal_index`` (e.g. ["sig-04591c9f637f", ...]), not prose. An
             explicit empty list is honest "no signals recognised" — the rubric
             scoring lens still runs over the provided tests; the corpus contributes
@@ -262,7 +262,7 @@ def evaluate_coverage(
         contributes no corpus content, never a husk.
     """
     test_descriptions = coerce(test_descriptions, list) or []
-    matched_signal_ids = coerce(structural_signals, list) or []
+    matched_signal_ids = coerce(matched_signal_ids, list) or []
     try:
         k = int(k)
     except (TypeError, ValueError):

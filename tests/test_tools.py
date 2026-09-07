@@ -29,7 +29,7 @@ class TestPlanTestStrategy:
     def test_matches_unit_test_signals(self):
         result = plan_test_strategy(
             system_description="Pure function that validates email addresses",
-            structural_signals=self._strategy_ids("unit_isolation"),
+            matched_signal_ids=self._strategy_ids("unit_isolation"),
         )
         assert result["retrieval_state"] in ("hit", "low_confidence")
         assert any(r["strategy_id"] == "unit_isolation"
@@ -42,7 +42,7 @@ class TestPlanTestStrategy:
     def test_returns_strategies_and_frameworks(self):
         result = plan_test_strategy(
             system_description="REST API with database",
-            structural_signals=self._strategy_ids("unit_isolation"),
+            matched_signal_ids=self._strategy_ids("unit_isolation"),
         )
         assert "recommended_strategies" in result
         assert "frameworks" in result
@@ -54,7 +54,7 @@ class TestPlanTestStrategy:
         pat = idx["pattern_signals"][0]
         result = plan_test_strategy(
             system_description="AI agent that calls tools and generates responses",
-            structural_signals=[pat["signal_id"]],
+            matched_signal_ids=[pat["signal_id"]],
         )
         assert "agent_patterns" in result
         got = {p["pattern_id"] for p in result["agent_patterns"]}
@@ -66,7 +66,7 @@ class TestPlanTestStrategy:
     def test_empty_signals_returns_empty(self):
         result = plan_test_strategy(
             system_description="Something",
-            structural_signals=[],
+            matched_signal_ids=[],
         )
         assert "matched_rules" not in result
         assert result["recommended_strategies"] == []
@@ -75,7 +75,7 @@ class TestPlanTestStrategy:
     def test_constraints_filter(self):
         result = plan_test_strategy(
             system_description="Fast API endpoint",
-            structural_signals=self._strategy_ids("unit_isolation"),
+            matched_signal_ids=self._strategy_ids("unit_isolation"),
             constraints={"max_setup": "low"},
         )
         # Constraint gate reads each strategy's OWN nested complexity.
@@ -279,7 +279,7 @@ class TestTokenOverlap:
 class TestEvaluateCoverage:
     """Test the coverage evaluation tool.
 
-    Post-S4 contract: ``structural_signals`` carries the matched SIGNAL IDS
+    Post-S4 contract: ``matched_signal_ids`` carries the matched SIGNAL IDS
     recognised against get_signal_index (an empty list runs the rubric scoring lens
     only). These cover the rubric-lens arithmetic; the corpus-reach behaviour has its
     own gate in test_s4_evaluate_coverage_retrofit.py.
@@ -291,7 +291,7 @@ class TestEvaluateCoverage:
                 {"name": "test_login", "category": "functional", "what_it_tests": "login"},
             ],
             system_description="Web app with auth, API, and database",
-            structural_signals=[],
+            matched_signal_ids=[],
         )
         assert len(result["risk_areas"]) > 0
         assert "recommendations" in result
@@ -306,7 +306,7 @@ class TestEvaluateCoverage:
                 ]
             ],
             system_description="Some system",
-            structural_signals=[],
+            matched_signal_ids=[],
         )
         assert result["coverage_by_category"] is not None
 

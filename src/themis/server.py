@@ -64,7 +64,7 @@ def get_signal_index(conn: Any = None) -> dict:
 @mcp.tool()
 def plan_test_strategy(
     system_description: str,
-    structural_signals: Union[list[str], str],
+    matched_signal_ids: Union[list[str], str],
     constraints: Union[dict[str, Any], str, None] = None,
     conn: Any = None,
 ) -> dict:
@@ -78,7 +78,7 @@ def plan_test_strategy(
     Args:
         system_description: What the system does, its inputs/outputs, and
             architecture — context/telemetry (retrieval is driven by the signal ids).
-        structural_signals: The matched SIGNAL IDS recognised against
+        matched_signal_ids: The matched SIGNAL IDS recognised against
             get_signal_index (e.g. ["sig-04591c9f637f", ...]), not prose.
         constraints: Optional dict read by the constraint gate — keys language/
             category/max_setup/max_maintenance/max_execution/agent_testing_support.
@@ -91,7 +91,7 @@ def plan_test_strategy(
     """
     return _plan_test_strategy(
         system_description=system_description,
-        structural_signals=coerce(structural_signals, list),
+        matched_signal_ids=coerce(matched_signal_ids, list),
         constraints=coerce(constraints, dict),
         conn=conn,
     )
@@ -133,7 +133,7 @@ def judge_output(
 
 
 @mcp.tool()
-async def run_agent_test(
+def run_agent_test(
     agent_endpoint: str,
     adapter_type: str = "http",
     test_cases: Union[list[dict], str, None] = None,
@@ -158,7 +158,7 @@ async def run_agent_test(
     Returns: {agent: "...", adapter: "...", results: [{test_case, response,
               latency_ms, status_code, tokens_used}], summary: {...}}
     """
-    return await _run_agent_test(
+    return _run_agent_test(
         agent_endpoint=agent_endpoint,
         adapter_type=adapter_type,
         test_cases=coerce(test_cases, list),
@@ -171,7 +171,7 @@ async def run_agent_test(
 def evaluate_coverage(
     test_descriptions: Union[list[dict], str],
     system_description: str,
-    structural_signals: Union[list[str], str],
+    matched_signal_ids: Union[list[str], str],
     k: int = 10,
     conn: Any = None,
 ) -> dict:
@@ -187,7 +187,7 @@ def evaluate_coverage(
             ``name``, ``category``, and ``what_it_tests``.
         system_description: What the system does — context/telemetry (the reachable
             corpus is driven by the signal ids).
-        structural_signals: The matched SIGNAL IDS recognised against
+        matched_signal_ids: The matched SIGNAL IDS recognised against
             get_signal_index (e.g. ["sig-04591c9f637f", ...]), not prose. An empty
             list is honest "no signals recognised" — the rubric scoring lens still
             runs; the corpus contributes nothing (fail-closed).
@@ -203,7 +203,7 @@ def evaluate_coverage(
     return _evaluate_coverage(
         test_descriptions=coerce(test_descriptions, list),
         system_description=system_description,
-        structural_signals=coerce(structural_signals, list),
+        matched_signal_ids=coerce(matched_signal_ids, list),
         k=k,
         conn=conn,
     )

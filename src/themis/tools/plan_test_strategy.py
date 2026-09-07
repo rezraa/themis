@@ -31,10 +31,12 @@ agent-signal/agent-pattern island, whose 12 stub patterns shadowed the 60-signal
 agent_patterns.json corpus and carried none of its fields; agent-pattern detection now
 flows through the loader's real agent-pattern methods.
 
-The two MCP-boundary params stay honestly required with the fail-loud +
-lone-stray-string recovery bound by test_tool_hardening.py. ``structural_signals``
-now carries the matched SIGNAL IDS the caller recognised against
-``get_signal_index`` (problem-language -> sig-id, the reachable path), not prose.
+The two MCP-boundary params are truly required (no default), so the advertised
+signature lists them in ``required`` and a missing one raises the native TypeError
+that Othrys' ``_signature_error`` renders; unknown kwargs are still rejected loudly
+(bound by test_tool_hardening.py). ``matched_signal_ids`` carries the matched SIGNAL
+IDS the caller recognised against ``get_signal_index`` (problem-language -> sig-id,
+the reachable path), not prose.
 
 Firewall: imports only themis.* — never othrys.*/coeus.*/mnemos.*/theia.*.
 """
@@ -51,10 +53,6 @@ from themis.tools._shared import (
     emit_event,
     get_knowledge,
 )
-
-# Sentinel distinguishing "argument omitted" from an explicit None/empty value,
-# so a missing required signal fails loud instead of silently defaulting.
-_MISSING = object()
 
 
 def _strategy_view(s: dict) -> dict:
@@ -105,8 +103,8 @@ def _agent_pattern_view(p: dict) -> dict:
 
 
 def plan_test_strategy(
-    system_description: Any = _MISSING,
-    structural_signals: Any = _MISSING,
+    system_description: Any,
+    matched_signal_ids: Any,
     constraints: dict | None = None,
     k: int = 10,
     conn: object = None,
@@ -116,8 +114,8 @@ def plan_test_strategy(
 
     Args:
         system_description: Description of what needs testing — context/telemetry
-            only (retrieval is driven by ``structural_signals``, not this text).
-        structural_signals: The matched SIGNAL IDS the caller recognised against
+            only (retrieval is driven by ``matched_signal_ids``, not this text).
+        matched_signal_ids: The matched SIGNAL IDS recognised against
             ``get_signal_index`` (e.g. ["sig-04591c9f637f", ...]). Required — a
             missing value raises rather than silently defaulting, since an empty
             signal set would mask a caller bug. Ids the index does not recognise are
@@ -138,29 +136,17 @@ def plan_test_strategy(
         Fail-closed: an abstaining leg contributes empty lists, never a husk.
     """
     # --- MCP-boundary arg hardening (contract bound by test_tool_hardening.py) ---
-    # Recover a lone stray string -> system_description when the caller sent exactly
-    # one extra string and system_description was not supplied.
-    if system_description is _MISSING and extra:
-        stray_strings = [key for key, v in extra.items() if isinstance(v, str)]
-        if len(extra) == 1 and len(stray_strings) == 1:
-            system_description = extra.pop(stray_strings[0])
+    # system_description and matched_signal_ids are truly required (no default), so
+    # inspect.signature advertises them in `required` and a missing one raises the
+    # native TypeError that Othrys' _signature_error renders. **extra stays only to
+    # reject unknown kwargs loudly rather than silently dropping them.
     if extra:
         raise TypeError(
             "plan_test_strategy() got unexpected keyword argument(s): "
             + ", ".join(sorted(extra))
         )
-    if system_description is _MISSING:
-        raise TypeError(
-            "plan_test_strategy() missing required argument 'system_description'"
-        )
-    if structural_signals is _MISSING:
-        raise TypeError(
-            "plan_test_strategy requires 'structural_signals' (the matched signal "
-            "ids recognised against get_signal_index); refusing to default it to [] "
-            "as that would mask a caller bug"
-        )
 
-    matched_signal_ids = coerce(structural_signals, list, default=[])
+    matched_signal_ids = coerce(matched_signal_ids, list, default=[])
     constraints = _bounded_constraints(coerce(constraints, dict, default={}))
     try:
         k = int(k)
