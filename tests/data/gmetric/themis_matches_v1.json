@@ -1,0 +1,187 @@
+{
+  "matches": {
+    "P01": [
+      "function with many edge cases on same signature",
+      "parameterized cases",
+      "many input variations"
+    ],
+    "P02": [
+      "testing isolated function logic with known inputs",
+      "isolated unit under test",
+      "known inputs and outputs"
+    ],
+    "P03": [
+      "pure function with no side effects",
+      "deterministic pure logic",
+      "no external dependencies"
+    ],
+    "P04": [
+      "REST or GraphQL endpoint",
+      "http endpoint",
+      "request response cycle"
+    ],
+    "P05": [
+      "UI component rendering",
+      "rendered component output",
+      "snapshot of the view"
+    ],
+    "P06": [
+      "rate-limited API endpoint",
+      "throttling and quotas",
+      "429 handling"
+    ],
+    "P07": [
+      "method with injectable dependencies",
+      "dependency injection seam",
+      "swap collaborators for doubles"
+    ],
+    "P08": [
+      "boundary value analysis needed",
+      "edge and boundary values",
+      "off by one ranges"
+    ],
+    "P09": [
+      "transaction rollback behavior",
+      "rollback on failure",
+      "database transaction integrity"
+    ],
+    "P10": [
+      "idempotency key handling",
+      "retry-safe writes",
+      "duplicate request suppression"
+    ],
+    "P11": [
+      "we have code that uses async and await and we're worried about race conditions and timeouts",
+      "asynchronous code",
+      "concurrency and race conditions",
+      "await and timeouts"
+    ],
+    "P12": [
+      "our repository layer talks to postgres and we keep shipping query bugs mocks don't catch",
+      "repository talks to a real database",
+      "sql query bugs mocks miss"
+    ],
+    "P13": [
+      "the checkout and payment path cannot break it's how we make money",
+      "revenue critical user flow",
+      "money path must not break"
+    ],
+    "P14": [
+      "we encode and decode messages and want to be sure round-tripping never loses data across random inputs",
+      "encode then decode",
+      "random inputs preserve data"
+    ],
+    "P15": [
+      "the service runs for days and memory slowly climbs until it falls over",
+      "memory grows over days",
+      "long running process degradation"
+    ],
+    "P16": [
+      "we pull in a lot of third-party packages and need to know when one has a known vulnerability",
+      "third party packages",
+      "known vulnerability alerts"
+    ],
+    "P17": [
+      "several teams own services that call each other and deploys keep breaking downstream consumers",
+      "services owned by different teams",
+      "deploys break downstream callers"
+    ],
+    "P18": [
+      "coverage is high but we don't trust the tests actually catch regressions",
+      "coverage high confidence low",
+      "do the tests catch real bugs"
+    ],
+    "P19": [
+      "a css refactor silently shifted the layout and no functional test noticed",
+      "layout shifted after a css change",
+      "visual regression"
+    ],
+    "P20": [
+      "legal says the public site must meet accessibility contrast and aria requirements",
+      "public site accessibility",
+      "contrast and aria compliance"
+    ],
+    "P21": [
+      "system prompt was modified",
+      "prompt changed",
+      "output quality drifted"
+    ],
+    "P22": [
+      "agent has access to multiple tools",
+      "function calling",
+      "tool selection and parameters"
+    ],
+    "P23": [
+      "RAG-based agent with source documents",
+      "retrieval augmented answers",
+      "grounded in source documents"
+    ],
+    "P24": [
+      "public-facing AI agent",
+      "user facing assistant",
+      "abuse and content policy"
+    ],
+    "P25": [
+      "long conversation sessions",
+      "very long chats",
+      "history near the window limit"
+    ],
+    "P26": [
+      "production reliability requirement",
+      "stable outputs in a pipeline",
+      "variance across runs"
+    ],
+    "P27": [
+      "agent uses server-sent events",
+      "streamed tokens",
+      "server sent events chunks"
+    ],
+    "P28": [
+      "agent invents citations or URLs",
+      "fabricated citations",
+      "made up source urls"
+    ],
+    "P29": [
+      "every time we tweak the system prompt the answer quality changes and we don't catch it",
+      "tweaking the system prompt",
+      "answer quality shifts silently"
+    ],
+    "P30": [
+      "the agent keeps calling the wrong function or passing garbage arguments",
+      "agent calls the wrong tool",
+      "garbage arguments extracted"
+    ],
+    "P31": [
+      "in a long chat the assistant forgets what the user said earlier and contradicts itself",
+      "assistant forgets earlier turns",
+      "contradicts itself in a long chat"
+    ],
+    "P32": [
+      "the bot invents facts that aren't in the documents we gave it",
+      "bot invents facts",
+      "claims not in the provided documents"
+    ],
+    "P33": [
+      "people are jailbreaking our public assistant to make it say harmful things",
+      "jailbreaking the assistant",
+      "coax it into harmful output"
+    ],
+    "P34": [
+      "we stuff a lot of retrieved docs into the prompt and sometimes it silently truncates",
+      "stuffing many retrieved docs",
+      "prompt silently truncates"
+    ],
+    "P35": [
+      "response times crept up after a model change and we need p95 baselines",
+      "response times crept up",
+      "need p95 latency baselines"
+    ],
+    "P36": [
+      "we chain a research agent into a writer agent and errors in the first corrupt the second",
+      "research agent feeds a writer agent",
+      "errors corrupt the next stage"
+    ],
+    "P_EMPTY": []
+  },
+  "version": "v1"
+}

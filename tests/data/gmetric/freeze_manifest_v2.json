@@ -1,0 +1,11 @@
+{
+  "pins": {
+    "agent_patterns.json": "01e84215e7dcd698b51761f5a554a3161289e62a7b3580f988b64ddcdd1bf461",
+    "decision_rules.json": "650b4deb0aeddd943b28a4ccf1c0d04bc857c80b34c6cbe75b5dd2e14c97bc8e",
+    "gmetric_v2.json": "b0aac5648f077a8f085fe1ccb99acb6f15d0c7fddbd42249f5f6916bb48d59dc",
+    "problems_blind_v2.json": "1750f95070a91d0f40c1392342699ac3c820a31e1365841fcfc50d76734edf4c",
+    "test_strategies.json": "e08cd4bb1ba4c5aa423573bd654075c4b9095c78c1845feef8704966dc19b446"
+  },
+  "story": "story-350b3817",
+  "version": "v2"
+}

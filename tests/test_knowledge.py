@@ -1,5 +1,5 @@
 # Copyright (c) 2026 Reza Malik. Licensed under the Apache License, Version 2.0.
-"""Tests for Themis knowledge base — strategies, patterns, rules, frameworks."""
+"""Tests for Themis knowledge base — strategies, patterns, frameworks."""
 
 from __future__ import annotations
 
@@ -27,9 +27,6 @@ class TestKnowledgeLoading:
     def test_frameworks_loaded(self, kb):
         frameworks = kb.get_all_frameworks()
         assert len(frameworks) >= 15, f"Expected 15+ frameworks, got {len(frameworks)}"
-
-    def test_decision_rules_loaded(self, kb):
-        assert len(kb._rules) >= 35, f"Expected 35+ rules, got {len(kb._rules)}"
 
     def test_strategies_have_required_fields(self, kb):
         for s in kb.get_all_strategies():
@@ -103,34 +100,6 @@ class TestFrameworkRetrieval:
         assert len(agent_fw) >= 3
         for f in agent_fw:
             assert f.get("agent_testing_support") in ("native", "plugin")
-
-
-class TestSignalMatching:
-    """Test structural signal matching against decision rules."""
-
-    def test_exact_signal_match(self, kb):
-        matches = kb.match_structural_signals(
-            ["testing isolated function logic with known inputs"]
-        )
-        assert len(matches) >= 1
-        assert matches[0]["rule"]["recommended_strategy"] == "unit_parameterized"
-
-    def test_substring_signal_match(self, kb):
-        matches = kb.match_structural_signals(
-            ["testing isolated function logic"]
-        )
-        assert len(matches) >= 1
-
-    def test_no_match_for_gibberish(self, kb):
-        matches = kb.match_structural_signals(["xyzzy foobar nonsense"])
-        assert len(matches) == 0
-
-    def test_multiple_signals(self, kb):
-        matches = kb.match_structural_signals([
-            "testing isolated function logic",
-            "pure function with no side effects",
-        ])
-        assert len(matches) >= 2
 
 
 class TestConstraintFiltering:

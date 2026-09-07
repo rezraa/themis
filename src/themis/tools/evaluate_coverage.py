@@ -1,20 +1,57 @@
 # Copyright (c) 2026 Reza Malik. Licensed under the Apache License, Version 2.0.
-"""MCP tool: evaluate_coverage
+"""MCP tool: evaluate_coverage — wired onto the Shape-C retrieval engine.
 
-Analyze test coverage gaps by comparing existing test descriptions against
-the testing strategies recommended by the knowledge base.
+Measure test-coverage gaps against the REACHABLE corpus: the strategies and agent
+patterns actually recommended for the system's OWN signals, retrieved through the
+S2 hydrate seams (``kb.hydrate`` / ``kb.hydrate_patterns``) and the four-state
+fail-closed envelope — not against a hardcoded category rubric alone. The tool
+follows the cross-titan retrofit template (retrieve -> reason over each node's OWN
+fields -> four-state envelope; council 25d9a8ea / m-6ce2dcc3):
 
-Identifies missing strategies, risk areas, and specific tests to add.
+1. RETRIEVE the recommended strategies (``kb.hydrate`` over the strategy-signal view,
+   fanning out over the corpus's ``alternatives`` edge) and the recommended agent
+   patterns (``kb.hydrate_patterns``, direct-vote-only). ``no_match``/``dangling``
+   abstain to empty recommended sets, never a husk.
+2. REASON over each recommended node's OWN fields — a strategy's ``category`` and
+   ``name``, an agent pattern's ``severity`` — to name the real corpus nodes a
+   suite leaves uncovered: ``missing_strategies`` are recommended STRATEGY nodes no
+   test covers; corpus ``risk_areas`` are recommended AGENT PATTERNS no test covers
+   (carrying their own severity) plus rubric-gap categories annotated with the real
+   strategies the corpus recommends for them.
+3. SCORE against ``_DEFAULT_CATEGORIES`` demoted to WEIGHTS ONLY (recommended_min,
+   priority) — the legitimate scoring lens over what a suite tested — while the
+   corpus ``category`` supplies the CONTENT: a corpus category the rubric never
+   held (e.g. "unit") now appears in ``coverage_by_category`` carrying its
+   recommended real strategies.
+
+The retrofit fixes the dead corpus reach: the pre-retrofit path read the phantom
+``recommended_pattern`` key (the loader sets ``recommended_strategy``), so
+``missing_strategies`` was ALWAYS [], and it reached the corpus only through the
+legacy lossy substring matcher over the decision-rules table. It now retrieves through
+the accessor's own 226-signal vocabulary; the legacy matcher was left at zero callers
+here and at S3, and deleted at S5.
+
+Firewall: imports only themis.* — never othrys.*/coeus.*/mnemos.*/theia.*.
 """
 
 from __future__ import annotations
 
 from typing import Any
 
-from themis.tools._shared import coerce, emit_event, get_knowledge
+from themis.knowledge.loader import DANGLING, NO_MATCH
+from themis.tools._shared import (
+    _MAX_MATCHED_SIGNALS,
+    coerce,
+    emit_event,
+    get_knowledge,
+)
 
 # ---------------------------------------------------------------------------
-# Standard testing categories and their recommended minimum coverage
+# Scoring weights — the general coverage-dimension rubric, DEMOTED to weights only
+# (recommended_min + priority), no longer the sole content source. The corpus
+# `category` field is the content source (see the module docstring); this table is
+# the legitimate scoring lens over what a suite already tested. Each entry's
+# ``description`` labels the rubric dimension it weighs.
 # ---------------------------------------------------------------------------
 
 _DEFAULT_CATEGORIES: dict[str, dict[str, Any]] = {
@@ -65,7 +102,11 @@ _DEFAULT_CATEGORIES: dict[str, dict[str, Any]] = {
     },
 }
 
-# Category aliases — normalise test descriptions into standard categories
+# Category aliases — normalise a raw category (a test's declared category OR a corpus
+# strategy's `category`) into a rubric weight key where the corpus taxonomy and the
+# rubric taxonomy name the same dimension (e.g. corpus "security" weighs as "safety",
+# corpus "load" as "performance"). A corpus category with no rubric twin (unit,
+# integration, e2e, ...) passes through unchanged and supplies its own content.
 _CATEGORY_ALIASES: dict[str, str] = {
     "happy_path": "functional",
     "happy-path": "functional",
@@ -107,26 +148,35 @@ _CATEGORY_ALIASES: dict[str, str] = {
     "known-bad": "regression",
 }
 
+# Weight for a corpus category the rubric does not define (its content comes from the
+# corpus; only the scoring weight defaults here). Auditable integers, not tuned.
+_CORPUS_CATEGORY_MIN = 1
+_CORPUS_CATEGORY_PRIORITY = "high"
+
+_PRIORITY_RANK = {"critical": 3, "high": 2, "medium": 1, "low": 0}
+
 
 def _normalise_category(raw: str) -> str:
-    """Map a raw category string to a standard category name."""
+    """Map a raw category string to its rubric weight key, else pass it through."""
     lower = raw.lower().strip().replace(" ", "_")
     return _CATEGORY_ALIASES.get(lower, lower)
 
 
 def _infer_category(test_desc: dict[str, Any]) -> str:
-    """Infer a standard category from test description fields."""
-    # Explicit category
+    """Infer a coverage category from a test description's fields.
+
+    An explicit ``category`` is normalised (so a test tagged "unit"/"security" lands
+    in the matching corpus/rubric bucket); otherwise the category is inferred from the
+    name/what_it_tests prose by keyword overlap, defaulting to ``functional``.
+    """
     cat = test_desc.get("category", "")
     if cat:
         return _normalise_category(cat)
 
-    # Infer from name and what_it_tests
     name = test_desc.get("name", "").lower()
     what = test_desc.get("what_it_tests", "").lower()
     combined = f"{name} {what}"
 
-    # Score each category by keyword overlap
     best_cat = "functional"  # default
     best_score = 0
 
@@ -151,6 +201,30 @@ def _infer_category(test_desc: dict[str, Any]) -> str:
     return best_cat
 
 
+# Testing-vocabulary tokens carry no coverage signal: every test is named "test_*"
+# and describes a "case", so matching them would mark every recommended node covered.
+_GENERIC_TOKENS = frozenset({"test", "tests", "testing", "case", "cases", "strategy", "pattern"})
+
+
+def _tokens(text: str) -> list[str]:
+    """Distinctive (>3 char, non-generic) tokens of a corpus node, for coverage matching."""
+    return [
+        t for t in text.lower().replace("-", " ").replace("_", " ").split()
+        if len(t) > 3 and t not in _GENERIC_TOKENS
+    ]
+
+
+def _covered_by_tests(node: dict, all_test_text: str) -> bool:
+    """Does any existing test's text mention a distinctive token of *node* (id + name)?
+
+    The name-token heuristic the pre-retrofit tool used, applied to REAL recommended
+    corpus nodes (its target was always empty before), and hardened against the
+    generic testing vocabulary that would otherwise mark every node covered.
+    """
+    text = f"{node.get('id', '')} {node.get('name', '')}"
+    return any(tok in all_test_text for tok in _tokens(text))
+
+
 # ---------------------------------------------------------------------------
 # Main tool
 # ---------------------------------------------------------------------------
@@ -159,204 +233,210 @@ def evaluate_coverage(
     test_descriptions: list[dict],
     system_description: str,
     structural_signals: list[str],
+    k: int = 10,
     conn: object = None,
 ) -> dict:
-    """Analyze test coverage gaps against the knowledge base.
+    """Measure test-coverage gaps against the reachable corpus.
 
     Args:
-        test_descriptions: List of dicts, each with:
-            - ``name`` (str): Test name.
-            - ``category`` (str): Test category (will be normalised).
-            - ``what_it_tests`` (str): Description of what's tested.
-        system_description: Description of the system under test.
-        structural_signals: Optional signals for knowledge base matching.
-        conn: Kuzu/LadybugDB connection for graph mode, or None.
+        test_descriptions: List of dicts describing existing tests, each with
+            ``name``, ``category`` (normalised), and ``what_it_tests``.
+        system_description: Description of the system under test — context/telemetry
+            only (the reachable corpus is driven by ``structural_signals``).
+        structural_signals: The matched SIGNAL IDS the caller recognised against
+            ``get_signal_index`` (e.g. ["sig-04591c9f637f", ...]), not prose. An
+            explicit empty list is honest "no signals recognised" — the rubric
+            scoring lens still runs over the provided tests; the corpus contributes
+            nothing (fail-closed), never a fabricated node.
+        k: Number of ranked strategies/patterns to retrieve (engine-clamped 1..50).
+        conn: Kuzu/LadybugDB connection for graph mode, or None for JSON.
 
     Returns:
-        Dict with keys: coverage_by_category, missing_strategies,
-        risk_areas, recommendations, summary.
+        Dict with ``coverage_by_category`` (rubric weights + the corpus strategies
+        recommended per category), ``missing_strategies`` (recommended corpus
+        strategy nodes no test covers), ``risk_areas`` (recommended agent-pattern
+        nodes no test covers, carrying their own severity, plus rubric-gap categories
+        naming their recommended strategies), ``recommendations``, ``summary``, and
+        the retrieval envelope (``retrieval_state``/``agent_pattern_state``/
+        ``unmatched_signals``/``dangling``). Fail-closed: an abstaining leg
+        contributes no corpus content, never a husk.
     """
     test_descriptions = coerce(test_descriptions, list) or []
-    structural_signals = coerce(structural_signals, list) or []
+    matched_signal_ids = coerce(structural_signals, list) or []
+    try:
+        k = int(k)
+    except (TypeError, ValueError):
+        k = 10
 
     kb = get_knowledge(conn)
+    # Named ceiling applied where the cost is incurred: bound the caller's id list
+    # BEFORE hydrate (non-amplifying — the engine's _SEED_CAP bounds fan-out below).
+    seed_ids = matched_signal_ids[:_MAX_MATCHED_SIGNALS]
 
-    # 1. Categorise existing tests
+    # 1. RETRIEVE the reachable corpus through the four-state fail-closed envelope.
+    #    A recognised-but-empty (no_match) or unresolvable (dangling) leg abstains to
+    #    an empty recommended set — no corpus content, never the nearest husk.
+    strat = kb.hydrate(seed_ids, k=k)
+    pat = kb.hydrate_patterns(seed_ids, k=k)
+    recommended_strategies = list(strat.patterns) if strat.state not in (NO_MATCH, DANGLING) else []
+    recommended_patterns = list(pat.patterns) if pat.state not in (NO_MATCH, DANGLING) else []
+
+    # 2. Categorise existing tests (the "what IS tested" side, rubric taxonomy).
     category_counts: dict[str, int] = {}
     categorised_tests: dict[str, list[str]] = {}
-
     for td in test_descriptions:
         cat = _infer_category(td)
         category_counts[cat] = category_counts.get(cat, 0) + 1
         categorised_tests.setdefault(cat, []).append(td.get("name", "unnamed"))
 
-    # 2. Build coverage map against default categories
-    coverage_by_category: dict[str, dict[str, Any]] = {}
-
-    for cat_name, cat_info in _DEFAULT_CATEGORIES.items():
-        covered = category_counts.get(cat_name, 0)
-        recommended = cat_info["recommended_min"]
-        gap = max(0, recommended - covered)
-
-        coverage_by_category[cat_name] = {
-            "description": cat_info["description"],
-            "covered": covered,
-            "recommended": recommended,
-            "gap": gap,
-            "priority": cat_info["priority"],
-            "tests": categorised_tests.get(cat_name, []),
-        }
-
-    # Include any custom categories not in defaults
-    for cat_name, count in category_counts.items():
-        if cat_name not in _DEFAULT_CATEGORIES:
-            coverage_by_category[cat_name] = {
-                "description": f"Custom category: {cat_name}",
-                "covered": count,
-                "recommended": 1,
-                "gap": 0,
-                "priority": "low",
-                "tests": categorised_tests.get(cat_name, []),
-            }
-
-    # 3. Match structural signals to find recommended strategies from KB
-    kb_strategies: list[dict[str, Any]] = []
-    if structural_signals:
-        rule_matches = kb.match_structural_signals(structural_signals)
-        for rm in rule_matches:
-            rule = rm["rule"]
-            rec = rm.get("recommended_pattern")
-            if rec:
-                kb_strategies.append({
-                    "strategy_id": rec["id"],
-                    "name": rec.get("name", rec["id"]),
-                    "signal": rm["signal"],
-                    "rule_id": rule["id"],
-                })
-            for alt in rm.get("alternatives", []):
-                kb_strategies.append({
-                    "strategy_id": alt["id"],
-                    "name": alt.get("name", alt["id"]),
-                    "signal": rm["signal"],
-                    "rule_id": rule["id"],
-                })
-
-    # 4. Find missing strategies — KB strategies not covered by any test
-    test_names_lower = {td.get("name", "").lower() for td in test_descriptions}
-    test_whats_lower = {td.get("what_it_tests", "").lower() for td in test_descriptions}
-    all_test_text = " ".join(test_names_lower | test_whats_lower)
-
-    missing_strategies: list[dict[str, Any]] = []
-    for strat in kb_strategies:
-        strat_name = strat["name"].lower().replace("-", " ").replace("_", " ")
-        # Check if any existing test seems to cover this strategy
-        covered = any(
-            token in all_test_text
-            for token in strat_name.split()
-            if len(token) > 3
-        )
-        if not covered:
-            missing_strategies.append(strat)
-
-    # 5. Identify risk areas — categories with gaps and high priority
-    priority_rank = {"critical": 3, "high": 2, "medium": 1, "low": 0}
-    risk_areas: list[dict[str, Any]] = []
-
-    for cat_name, info in coverage_by_category.items():
-        if info["gap"] > 0:
-            risk_areas.append({
-                "category": cat_name,
-                "description": info["description"],
-                "gap": info["gap"],
-                "priority": info["priority"],
-                "severity": "critical" if info["priority"] == "critical" and info["gap"] >= 2
-                    else "high" if info["priority"] in ("critical", "high")
-                    else "medium",
-            })
-
-    risk_areas.sort(
-        key=lambda r: (-priority_rank.get(r["priority"], 0), -r["gap"]),
+    all_test_text = " ".join(
+        {td.get("name", "").lower() for td in test_descriptions}
+        | {td.get("what_it_tests", "").lower() for td in test_descriptions}
     )
 
-    # 6. Generate specific recommendations
-    recommendations: list[dict[str, Any]] = []
+    # 3. Map the reachable corpus's recommended strategies onto categories — the CONTENT
+    #    the corpus supplies. Each strategy's OWN `category` is normalised onto the
+    #    scoring axis; strategies with no rubric twin (unit, integration, ...) bring
+    #    their own category in.
+    strategies_by_category: dict[str, list[dict[str, str]]] = {}
+    for s in recommended_strategies:
+        cat = _normalise_category(s.get("category", "")) or "uncategorised"
+        strategies_by_category.setdefault(cat, []).append(
+            {"strategy_id": s.get("id", ""), "name": s.get("name", s.get("id", ""))}
+        )
 
-    for risk in risk_areas[:5]:  # Top 5 risk areas
-        cat = risk["category"]
-        cat_info = _DEFAULT_CATEGORIES.get(cat, {})
-        gap = risk["gap"]
+    # 4. coverage_by_category — the union of the rubric weight categories, the existing
+    #    tests' categories, and the corpus's recommended-strategy categories. Weights
+    #    (recommended_min, priority) come from _DEFAULT_CATEGORIES; a corpus-only
+    #    category takes the corpus default weight. `recommended_strategies` is the
+    #    corpus content per category (real nodes), demoting the rubric from monopoly.
+    coverage_by_category: dict[str, dict[str, Any]] = {}
+    # Sorted so the result serialises deterministically regardless of set/hash order.
+    all_categories = sorted(set(_DEFAULT_CATEGORIES) | set(category_counts) | set(strategies_by_category))
+    for cat in all_categories:
+        weight = _DEFAULT_CATEGORIES.get(cat)
+        in_rubric = weight is not None
+        has_corpus = cat in strategies_by_category
+        covered = category_counts.get(cat, 0)
+        recommended = weight["recommended_min"] if in_rubric else _CORPUS_CATEGORY_MIN
+        coverage_by_category[cat] = {
+            "description": weight["description"] if in_rubric
+                else f"Corpus-recommended category: {cat}",
+            "covered": covered,
+            "recommended": recommended,
+            "gap": max(0, recommended - covered),
+            "priority": weight["priority"] if in_rubric else _CORPUS_CATEGORY_PRIORITY,
+            "tests": categorised_tests.get(cat, []),
+            "recommended_strategies": strategies_by_category.get(cat, []),
+            "source": "both" if (in_rubric and has_corpus)
+                else "corpus" if has_corpus else "rubric",
+        }
 
-        for i in range(min(gap, 3)):  # Up to 3 recommendations per category
-            rec: dict[str, Any] = {
-                "category": cat,
-                "priority": risk["priority"],
-            }
-
-            if cat == "functional":
-                rec["suggested_test"] = f"test_{cat}_case_{i+1}"
-                rec["description"] = "Add a test for core happy-path behaviour"
-            elif cat == "edge_cases":
-                edge_types = ["empty_input", "maximum_length", "special_characters"]
-                rec["suggested_test"] = f"test_edge_{edge_types[i % len(edge_types)]}"
-                rec["description"] = f"Add edge case test: {edge_types[i % len(edge_types)]}"
-            elif cat == "error_handling":
-                error_types = ["invalid_input", "malformed_json", "missing_required_field"]
-                rec["suggested_test"] = f"test_error_{error_types[i % len(error_types)]}"
-                rec["description"] = f"Add error handling test: {error_types[i % len(error_types)]}"
-            elif cat == "tool_usage":
-                tool_types = ["correct_tool_selected", "argument_validation", "tool_sequence"]
-                rec["suggested_test"] = f"test_tool_{tool_types[i % len(tool_types)]}"
-                rec["description"] = f"Add tool usage test: {tool_types[i % len(tool_types)]}"
-            elif cat == "safety":
-                safety_types = ["prompt_injection", "harmful_content_block", "pii_filtering"]
-                rec["suggested_test"] = f"test_safety_{safety_types[i % len(safety_types)]}"
-                rec["description"] = f"Add safety test: {safety_types[i % len(safety_types)]}"
-            elif cat == "performance":
-                rec["suggested_test"] = f"test_performance_{i+1}"
-                rec["description"] = "Add latency/token budget test"
-            elif cat == "consistency":
-                rec["suggested_test"] = f"test_consistency_{i+1}"
-                rec["description"] = "Add determinism or format compliance test"
-            elif cat == "multi_turn":
-                rec["suggested_test"] = f"test_multi_turn_{i+1}"
-                rec["description"] = "Add multi-turn context retention test"
-            elif cat == "regression":
-                rec["suggested_test"] = f"test_regression_{i+1}"
-                rec["description"] = "Add test for a previously known failure"
-            else:
-                rec["suggested_test"] = f"test_{cat}_{i+1}"
-                rec["description"] = f"Add test for {cat} category"
-
-            recommendations.append(rec)
-
-    # For missing KB strategies, also add recommendations
-    for strat in missing_strategies[:3]:
-        recommendations.append({
-            "category": "knowledge_base",
-            "priority": "medium",
-            "suggested_test": f"test_{strat['strategy_id']}",
-            "description": f"Add test covering strategy: {strat['name']}",
-            "from_signal": strat.get("signal", ""),
+    # 5. missing_strategies — recommended corpus STRATEGY nodes no existing test covers
+    #    (was ALWAYS [] because the old read looked for a phantom `recommended_pattern`
+    #    key the loader never sets). Each names a real corpus node with its own category.
+    missing_strategies: list[dict[str, Any]] = []
+    for s in recommended_strategies:
+        name = s.get("name", s.get("id", ""))
+        if _covered_by_tests(s, all_test_text):
+            continue
+        missing_strategies.append({
+            "strategy_id": s.get("id", ""),
+            "name": name,
+            "category": s.get("category", ""),
+            "reason": "recommended for the system's signals but not covered by any test",
+            "retrieval": dict(s.get("retrieval") or {}),
         })
 
-    # 7. Summary
+    # 6. risk_areas — real corpus nodes first (fail-closed: only when a leg hydrated):
+    #    (a) recommended AGENT PATTERNS no test covers, carrying their OWN severity;
+    #    (b) coverage_by_category gaps (the weights lens), each naming the real
+    #    strategies the corpus recommends for that category. Sorted by severity then gap.
+    risk_areas: list[dict[str, Any]] = []
+    for p in recommended_patterns:
+        name = p.get("name", p.get("id", ""))
+        if _covered_by_tests(p, all_test_text):
+            continue
+        severity = p.get("severity", "medium")
+        risk_areas.append({
+            "node_kind": "agent_pattern",
+            "node_id": p.get("id", ""),
+            "name": name,
+            "severity": severity,
+            "priority": severity,
+            "gap": 1,
+            "reason": "recommended agent pattern not covered by any test",
+        })
+
+    for cat, info in coverage_by_category.items():
+        if info["gap"] <= 0:
+            continue
+        priority = info["priority"]
+        severity = ("critical" if priority == "critical" and info["gap"] >= 2
+                    else "high" if priority in ("critical", "high")
+                    else "medium")
+        risk_areas.append({
+            "node_kind": "category",
+            "category": cat,
+            "description": info["description"],
+            "gap": info["gap"],
+            "priority": priority,
+            "severity": severity,
+            "recommended_strategies": info["recommended_strategies"],
+        })
+
+    risk_areas.sort(key=lambda r: (-_PRIORITY_RANK.get(r["severity"], 0), -r.get("gap", 0)))
+
+    # 7. recommendations — corpus-sourced first (name real nodes), then a generic
+    #    fallback for a pure-rubric gap the corpus recommended nothing for.
+    recommendations: list[dict[str, Any]] = []
+    for strat_ref in missing_strategies[:5]:
+        recommendations.append({
+            "category": _normalise_category(strat_ref["category"]) or "uncategorised",
+            "priority": "medium",
+            "suggested_test": f"test_{strat_ref['strategy_id']}",
+            "description": f"Add a test exercising strategy: {strat_ref['name']}",
+            "from_strategy": strat_ref["strategy_id"],
+        })
+    for risk in risk_areas:
+        if risk["node_kind"] != "agent_pattern":
+            continue
+        recommendations.append({
+            "category": "agent_pattern",
+            "priority": risk["priority"],
+            "suggested_test": f"test_{risk['node_id']}",
+            "description": f"Add an agent-pattern test: {risk['name']}",
+            "from_pattern": risk["node_id"],
+        })
+    for risk in risk_areas:
+        if risk["node_kind"] != "category" or risk.get("recommended_strategies"):
+            continue
+        cat = risk["category"]
+        recommendations.append({
+            "category": cat,
+            "priority": risk["priority"],
+            "suggested_test": f"test_{cat}_coverage",
+            "description": f"Add {risk['gap']} more test(s) for the {cat} dimension "
+                           f"({risk['description']})",
+        })
+
+    # 8. Summary.
     total_covered = sum(info["covered"] for info in coverage_by_category.values())
     total_recommended = sum(info["recommended"] for info in coverage_by_category.values())
     total_gap = sum(info["gap"] for info in coverage_by_category.values())
-    coverage_pct = round(
-        total_covered / total_recommended * 100, 1,
-    ) if total_recommended > 0 else 100.0
+    coverage_pct = round(total_covered / total_recommended * 100, 1) if total_recommended > 0 else 100.0
 
     summary = {
         "total_tests": len(test_descriptions),
-        "categories_covered": sum(
-            1 for info in coverage_by_category.values() if info["covered"] > 0
-        ),
+        "categories_covered": sum(1 for info in coverage_by_category.values() if info["covered"] > 0),
         "categories_total": len(coverage_by_category),
         "total_covered": total_covered,
         "total_recommended": total_recommended,
         "total_gap": total_gap,
         "coverage_percentage": min(coverage_pct, 100.0),
+        "reachable_strategies": len(recommended_strategies),
+        "reachable_agent_patterns": len(recommended_patterns),
+        "missing_strategies_count": len(missing_strategies),
         "risk_areas_count": len(risk_areas),
         "critical_gaps": sum(1 for r in risk_areas if r["severity"] == "critical"),
     }
@@ -367,12 +447,20 @@ def evaluate_coverage(
         "risk_areas": risk_areas,
         "recommendations": recommendations,
         "summary": summary,
+        "retrieval_state": strat.state,
+        "agent_pattern_state": pat.state,
+        "unmatched_signals": sorted(set(strat.unmatched_signals) & set(pat.unmatched_signals)),
+        "dangling": sorted(set(strat.dangling) | set(pat.dangling)),
     }
 
     emit_event("evaluate_coverage", {
-        "system_description": system_description[:120],
+        "system_description": system_description[:120] if isinstance(system_description, str) else "",
         "total_tests": len(test_descriptions),
         "coverage_pct": summary["coverage_percentage"],
+        "retrieval_state": strat.state,
+        "agent_pattern_state": pat.state,
+        "reachable_strategies": len(recommended_strategies),
+        "missing_strategies": len(missing_strategies),
         "risk_areas": len(risk_areas),
         "recommendations": len(recommendations),
     })

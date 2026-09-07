@@ -1,0 +1,376 @@
+{
+  "problems": [
+    {
+      "id": "P01",
+      "problem": "A single function signature has a large set of edge cases to cover.",
+      "query": [
+        "function with many edge cases on same signature"
+      ],
+      "register": "verbatim",
+      "stratum": "S-V",
+      "target": "strategy"
+    },
+    {
+      "id": "P02",
+      "problem": "Isolated function logic is tested with a set of known inputs.",
+      "query": [
+        "testing isolated function logic with known inputs"
+      ],
+      "register": "verbatim",
+      "stratum": "S-V",
+      "target": "strategy"
+    },
+    {
+      "id": "P03",
+      "problem": "A pure function with no side effects is the unit under test.",
+      "query": [
+        "pure function with no side effects"
+      ],
+      "register": "verbatim",
+      "stratum": "S-V",
+      "target": "strategy"
+    },
+    {
+      "id": "P04",
+      "problem": "A REST or GraphQL endpoint must be exercised over the wire.",
+      "query": [
+        "REST or GraphQL endpoint"
+      ],
+      "register": "verbatim",
+      "stratum": "S-V",
+      "target": "strategy"
+    },
+    {
+      "id": "P05",
+      "problem": "A UI component's rendered output must stay stable.",
+      "query": [
+        "UI component rendering"
+      ],
+      "register": "verbatim",
+      "stratum": "S-V",
+      "target": "strategy"
+    },
+    {
+      "id": "P06",
+      "problem": "A rate-limited API endpoint enforces per-caller quotas.",
+      "query": [
+        "rate-limited API endpoint"
+      ],
+      "register": "verbatim",
+      "stratum": "S-V",
+      "target": "strategy"
+    },
+    {
+      "id": "P07",
+      "problem": "A method's collaborators are injected and can be replaced with doubles.",
+      "query": [
+        "method with injectable dependencies"
+      ],
+      "register": "verbatim",
+      "stratum": "S-V",
+      "target": "strategy"
+    },
+    {
+      "id": "P08",
+      "problem": "Boundary value analysis is required across an input range.",
+      "query": [
+        "boundary value analysis needed"
+      ],
+      "register": "verbatim",
+      "stratum": "S-V",
+      "target": "strategy"
+    },
+    {
+      "id": "P09",
+      "problem": "Database transaction rollback behaviour must be verified.",
+      "query": [
+        "transaction rollback behavior"
+      ],
+      "register": "verbatim",
+      "stratum": "S-V",
+      "target": "strategy"
+    },
+    {
+      "id": "P10",
+      "problem": "An endpoint handles idempotency keys for retry-safe writes.",
+      "query": [
+        "idempotency key handling"
+      ],
+      "register": "verbatim",
+      "stratum": "S-V",
+      "target": "strategy"
+    },
+    {
+      "id": "P11",
+      "problem": "Async/await code with race-condition and timeout concerns (-> unit_async).",
+      "query": [
+        "we have code that uses async and await and we're worried about race conditions and timeouts"
+      ],
+      "register": "problem_language",
+      "stratum": "S-PL",
+      "target": "strategy"
+    },
+    {
+      "id": "P12",
+      "problem": "Repository layer against a real database, query bugs mocks miss (-> integration_database).",
+      "query": [
+        "our repository layer talks to postgres and we keep shipping query bugs mocks don't catch"
+      ],
+      "register": "problem_language",
+      "stratum": "S-PL",
+      "target": "strategy"
+    },
+    {
+      "id": "P13",
+      "problem": "Revenue-critical checkout/payment path (-> e2e_critical_path).",
+      "query": [
+        "the checkout and payment path cannot break it's how we make money"
+      ],
+      "register": "problem_language",
+      "stratum": "S-PL",
+      "target": "strategy"
+    },
+    {
+      "id": "P14",
+      "problem": "Encode/decode round-trip must hold across random inputs (-> property_based_fuzzing).",
+      "query": [
+        "we encode and decode messages and want to be sure round-tripping never loses data across random inputs"
+      ],
+      "register": "problem_language",
+      "stratum": "S-PL",
+      "target": "strategy"
+    },
+    {
+      "id": "P15",
+      "problem": "Long-running service with a suspected slow memory leak (-> load_soak).",
+      "query": [
+        "the service runs for days and memory slowly climbs until it falls over"
+      ],
+      "register": "problem_language",
+      "stratum": "S-PL",
+      "target": "strategy"
+    },
+    {
+      "id": "P16",
+      "problem": "Third-party dependencies needing CVE monitoring (-> security_dependency_scan).",
+      "query": [
+        "we pull in a lot of third-party packages and need to know when one has a known vulnerability"
+      ],
+      "register": "problem_language",
+      "stratum": "S-PL",
+      "target": "strategy"
+    },
+    {
+      "id": "P17",
+      "problem": "Independently-deployed microservices breaking consumers (-> contract_consumer_driven).",
+      "query": [
+        "several teams own services that call each other and deploys keep breaking downstream consumers"
+      ],
+      "register": "problem_language",
+      "stratum": "S-PL",
+      "target": "strategy"
+    },
+    {
+      "id": "P18",
+      "problem": "High coverage, low confidence the tests catch bugs (-> mutation_first_order).",
+      "query": [
+        "coverage is high but we don't trust the tests actually catch regressions"
+      ],
+      "register": "problem_language",
+      "stratum": "S-PL",
+      "target": "strategy"
+    },
+    {
+      "id": "P19",
+      "problem": "CSS refactor caused an unnoticed visual/layout regression (-> visual_pixel_diff).",
+      "query": [
+        "a css refactor silently shifted the layout and no functional test noticed"
+      ],
+      "register": "problem_language",
+      "stratum": "S-PL",
+      "target": "strategy"
+    },
+    {
+      "id": "P20",
+      "problem": "Public site must meet WCAG contrast/ARIA rules (-> accessibility_wcag_aa).",
+      "query": [
+        "legal says the public site must meet accessibility contrast and aria requirements"
+      ],
+      "register": "problem_language",
+      "stratum": "S-PL",
+      "target": "strategy"
+    },
+    {
+      "id": "P21",
+      "problem": "A system prompt was modified and output may have drifted.",
+      "query": [
+        "system prompt was modified"
+      ],
+      "register": "verbatim",
+      "stratum": "P-V",
+      "target": "pattern"
+    },
+    {
+      "id": "P22",
+      "problem": "An agent has access to multiple tools and must pick correctly.",
+      "query": [
+        "agent has access to multiple tools"
+      ],
+      "register": "verbatim",
+      "stratum": "P-V",
+      "target": "pattern"
+    },
+    {
+      "id": "P23",
+      "problem": "A RAG-based agent answers from source documents (collision text).",
+      "query": [
+        "RAG-based agent with source documents"
+      ],
+      "register": "verbatim",
+      "stratum": "P-V",
+      "target": "pattern"
+    },
+    {
+      "id": "P24",
+      "problem": "A public-facing AI agent must resist abuse (collision + substring-reachable).",
+      "query": [
+        "public-facing AI agent"
+      ],
+      "register": "verbatim",
+      "stratum": "P-V",
+      "target": "pattern"
+    },
+    {
+      "id": "P25",
+      "problem": "Long conversation sessions approach the context window (collision text).",
+      "query": [
+        "long conversation sessions"
+      ],
+      "register": "verbatim",
+      "stratum": "P-V",
+      "target": "pattern"
+    },
+    {
+      "id": "P26",
+      "problem": "A production reliability requirement demands output determinism (collision text).",
+      "query": [
+        "production reliability requirement"
+      ],
+      "register": "verbatim",
+      "stratum": "P-V",
+      "target": "pattern"
+    },
+    {
+      "id": "P27",
+      "problem": "An agent streams responses via server-sent events.",
+      "query": [
+        "agent uses server-sent events"
+      ],
+      "register": "verbatim",
+      "stratum": "P-V",
+      "target": "pattern"
+    },
+    {
+      "id": "P28",
+      "problem": "An agent invents citations or URLs that do not exist.",
+      "query": [
+        "agent invents citations or URLs"
+      ],
+      "register": "verbatim",
+      "stratum": "P-V",
+      "target": "pattern"
+    },
+    {
+      "id": "P29",
+      "problem": "Prompt tweaks silently shift answer quality (-> prompt_regression).",
+      "query": [
+        "every time we tweak the system prompt the answer quality changes and we don't catch it"
+      ],
+      "register": "problem_language",
+      "stratum": "P-PL",
+      "target": "pattern"
+    },
+    {
+      "id": "P30",
+      "problem": "Agent selects wrong tools / bad params (-> tool_call_validation).",
+      "query": [
+        "the agent keeps calling the wrong function or passing garbage arguments"
+      ],
+      "register": "problem_language",
+      "stratum": "P-PL",
+      "target": "pattern"
+    },
+    {
+      "id": "P31",
+      "problem": "Assistant loses context and self-contradicts (-> multi_turn_consistency).",
+      "query": [
+        "in a long chat the assistant forgets what the user said earlier and contradicts itself"
+      ],
+      "register": "problem_language",
+      "stratum": "P-PL",
+      "target": "pattern"
+    },
+    {
+      "id": "P32",
+      "problem": "Bot fabricates facts not grounded in context (-> hallucination_detection).",
+      "query": [
+        "the bot invents facts that aren't in the documents we gave it"
+      ],
+      "register": "problem_language",
+      "stratum": "P-PL",
+      "target": "pattern"
+    },
+    {
+      "id": "P33",
+      "problem": "Public assistant is being jailbroken (-> safety_guardrail).",
+      "query": [
+        "people are jailbreaking our public assistant to make it say harmful things"
+      ],
+      "register": "problem_language",
+      "stratum": "P-PL",
+      "target": "pattern"
+    },
+    {
+      "id": "P34",
+      "problem": "Large context injection silently truncates (-> token_budget).",
+      "query": [
+        "we stuff a lot of retrieved docs into the prompt and sometimes it silently truncates"
+      ],
+      "register": "problem_language",
+      "stratum": "P-PL",
+      "target": "pattern"
+    },
+    {
+      "id": "P35",
+      "problem": "Latency regressed after a model change (-> latency_profiling).",
+      "query": [
+        "response times crept up after a model change and we need p95 baselines"
+      ],
+      "register": "problem_language",
+      "stratum": "P-PL",
+      "target": "pattern"
+    },
+    {
+      "id": "P36",
+      "problem": "Chained agents where a stage's error corrupts downstream (-> agent_chain_integrity).",
+      "query": [
+        "we chain a research agent into a writer agent and errors in the first corrupt the second"
+      ],
+      "register": "problem_language",
+      "stratum": "P-PL",
+      "target": "pattern"
+    },
+    {
+      "id": "P_EMPTY",
+      "problem": "Empty query: recognition yields nothing; the path must resolve to NO_MATCH.",
+      "query": [
+        ""
+      ],
+      "register": "control",
+      "stratum": "CONTROL",
+      "target": "none"
+    }
+  ],
+  "story": "story-350b3817",
+  "version": "v1"
+}

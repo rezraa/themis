@@ -1,0 +1,339 @@
+{
+  "matches": {
+    "P01": {
+      "pattern": [],
+      "strategy": [
+        "sig-218d8f593276",
+        "sig-71ff0675866d",
+        "sig-a3129b5c6021",
+        "sig-a73144d72a8e",
+        "sig-a961910c7feb"
+      ]
+    },
+    "P02": {
+      "pattern": [],
+      "strategy": [
+        "sig-218d8f593276",
+        "sig-2f31e7e8d7a6",
+        "sig-71ff0675866d",
+        "sig-7a69f4a85bed",
+        "sig-9f85bdc9248a",
+        "sig-a3129b5c6021",
+        "sig-a961910c7feb",
+        "sig-b5caa61bbec9"
+      ]
+    },
+    "P03": {
+      "pattern": [],
+      "strategy": [
+        "sig-25f8d752c1ad",
+        "sig-71ff0675866d",
+        "sig-a961910c7feb"
+      ]
+    },
+    "P04": {
+      "pattern": [],
+      "strategy": [
+        "sig-2008e3760565",
+        "sig-22bedfff6264",
+        "sig-a58f45ac7897",
+        "sig-dace0d2d72d9"
+      ]
+    },
+    "P05": {
+      "pattern": [],
+      "strategy": [
+        "sig-02081f98ea63",
+        "sig-113591d36529",
+        "sig-8fce5bf05cec"
+      ]
+    },
+    "P06": {
+      "pattern": [],
+      "strategy": [
+        "sig-5ceb537e1a45",
+        "sig-a94127a33baf",
+        "sig-cbd13051a988",
+        "sig-df359c3c4df6"
+      ]
+    },
+    "P07": {
+      "pattern": [],
+      "strategy": [
+        "sig-7a455cd2662b"
+      ]
+    },
+    "P08": {
+      "pattern": [],
+      "strategy": [
+        "sig-91adf3db0b5c",
+        "sig-d4b666215c89"
+      ]
+    },
+    "P09": {
+      "pattern": [],
+      "strategy": [
+        "sig-009f4c99d6a1"
+      ]
+    },
+    "P10": {
+      "pattern": [],
+      "strategy": [
+        "sig-4748e0aabbe6",
+        "sig-7da1688a2d3e"
+      ]
+    },
+    "P11": {
+      "pattern": [],
+      "strategy": [
+        "sig-27c936155b4b"
+      ]
+    },
+    "P12": {
+      "pattern": [],
+      "strategy": [
+        "sig-8e267e12c1ed",
+        "sig-d40d9a36eeb0",
+        "sig-e05cfe5980e2"
+      ]
+    },
+    "P13": {
+      "pattern": [],
+      "strategy": [
+        "sig-41308044b23b",
+        "sig-a730c3013940",
+        "sig-d34cab981985",
+        "sig-db261fefeabf",
+        "sig-e6accff927a1"
+      ]
+    },
+    "P14": {
+      "pattern": [],
+      "strategy": [
+        "sig-041095e9dc6a",
+        "sig-66ade965a585"
+      ]
+    },
+    "P15": {
+      "pattern": [],
+      "strategy": [
+        "sig-3ad4317127a1",
+        "sig-49bd9619f5c5",
+        "sig-8d262411eccd"
+      ]
+    },
+    "P16": {
+      "pattern": [],
+      "strategy": [
+        "sig-10bec27c8d58",
+        "sig-ae2422641e1d",
+        "sig-ce9f357c6c6b",
+        "sig-ea2f0d5049a7"
+      ]
+    },
+    "P17": {
+      "pattern": [],
+      "strategy": [
+        "sig-1927100ba67e",
+        "sig-78e1734c52d4"
+      ]
+    },
+    "P18": {
+      "pattern": [],
+      "strategy": [
+        "sig-2e923e792320",
+        "sig-8e267e12c1ed",
+        "sig-d34cab981985"
+      ]
+    },
+    "P19": {
+      "pattern": [
+        "sig-3a70af0a004e"
+      ],
+      "strategy": [
+        "sig-1072ffbd124e",
+        "sig-bd1b6fb1db6c",
+        "sig-c4578801040c",
+        "sig-c8e7bc2db7d0"
+      ]
+    },
+    "P20": {
+      "pattern": [
+        "sig-9bb71f1a1c09"
+      ],
+      "strategy": [
+        "sig-0a9dee744239",
+        "sig-3958e0bc5d88",
+        "sig-5c011f18f0c9",
+        "sig-758ce95aa457",
+        "sig-7c923d6b6810"
+      ]
+    },
+    "P21": {
+      "pattern": [
+        "sig-8bac04d224ca",
+        "sig-c5c94f9ec349"
+      ],
+      "strategy": [
+        "sig-9bb7f3820be9",
+        "sig-a87c793ae420"
+      ]
+    },
+    "P22": {
+      "pattern": [
+        "sig-9a2cd94ffaa2",
+        "sig-bedb6887d0fd",
+        "sig-c195f17cc991",
+        "sig-d8d7b08f8949",
+        "sig-db6f4eaac22a"
+      ],
+      "strategy": [
+        "sig-022833804b98",
+        "sig-a9685dd8ad4d",
+        "sig-cedd7ee8ea53",
+        "sig-db76c1214b02"
+      ]
+    },
+    "P23": {
+      "pattern": [
+        "sig-59eeb3660d19",
+        "sig-70ce066871dc",
+        "sig-74ce99762e9e",
+        "sig-75041775f5ed",
+        "sig-764ba78c436e",
+        "sig-c3d475d580ef"
+      ],
+      "strategy": [
+        "sig-23b79c285e3c",
+        "sig-32937dd00d0e",
+        "sig-75041775f5ed",
+        "sig-8cd66e8b25d7",
+        "sig-a4c6ec8d96d0",
+        "sig-e1cda2485e87"
+      ]
+    },
+    "P24": {
+      "pattern": [
+        "sig-26ed3c302b1f",
+        "sig-33dd5f4fcfa6",
+        "sig-c605f7b24315"
+      ],
+      "strategy": [
+        "sig-4eec3ea95214",
+        "sig-73b53ac86b7f",
+        "sig-8488932c94a2",
+        "sig-c605f7b24315",
+        "sig-dea0012f308e"
+      ]
+    },
+    "P25": {
+      "pattern": [
+        "sig-719869fc5eac",
+        "sig-9c4baf1c1772",
+        "sig-d956b279bb33",
+        "sig-f510be79c409"
+      ],
+      "strategy": [
+        "sig-218b4616ae67",
+        "sig-9c4baf1c1772",
+        "sig-a2175d133eae",
+        "sig-a55678e6003b"
+      ]
+    },
+    "P26": {
+      "pattern": [
+        "sig-0b61e9480db2",
+        "sig-21615d5e9185"
+      ],
+      "strategy": [
+        "sig-0b61e9480db2",
+        "sig-b97c1f043dd8",
+        "sig-f4f9d3a0cef8"
+      ]
+    },
+    "P27": {
+      "pattern": [
+        "sig-eaad1bdeb09c"
+      ],
+      "strategy": [
+        "sig-185076b24aab",
+        "sig-9ec7993d863f",
+        "sig-a0e98b9ffa35"
+      ]
+    },
+    "P28": {
+      "pattern": [
+        "sig-74ce99762e9e",
+        "sig-75041775f5ed",
+        "sig-bea4a71477ad"
+      ],
+      "strategy": [
+        "sig-23b79c285e3c",
+        "sig-75041775f5ed",
+        "sig-e1cda2485e87"
+      ]
+    },
+    "P29": {
+      "pattern": [
+        "sig-8bac04d224ca"
+      ],
+      "strategy": [
+        "sig-9bb7f3820be9"
+      ]
+    },
+    "P30": {
+      "pattern": [
+        "sig-72ce36c16f77",
+        "sig-9a2cd94ffaa2",
+        "sig-db6f4eaac22a"
+      ],
+      "strategy": [
+        "sig-a9685dd8ad4d",
+        "sig-db76c1214b02"
+      ]
+    },
+    "P31": {
+      "pattern": [
+        "sig-2f825ba76779"
+      ],
+      "strategy": []
+    },
+    "P32": {
+      "pattern": [],
+      "strategy": [
+        "sig-8cd66e8b25d7"
+      ]
+    },
+    "P33": {
+      "pattern": [],
+      "strategy": []
+    },
+    "P34": {
+      "pattern": [],
+      "strategy": []
+    },
+    "P35": {
+      "pattern": [
+        "sig-3a70af0a004e",
+        "sig-bedb6887d0fd"
+      ],
+      "strategy": [
+        "sig-86c75e250439",
+        "sig-c342890eabf1"
+      ]
+    },
+    "P36": {
+      "pattern": [
+        "sig-02c68a5ef1a4",
+        "sig-fb9731b2cf78"
+      ],
+      "strategy": []
+    },
+    "P_EMPTY": {
+      "pattern": [],
+      "strategy": []
+    }
+  },
+  "story": "story-6c63a3bd",
+  "version": "v2"
+}

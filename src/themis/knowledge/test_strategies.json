@@ -12,7 +12,8 @@
         "pure function with no side effects",
         "method with injectable dependencies",
         "isolated business logic computation",
-        "single responsibility function"
+        "single responsibility function",
+        "pure function with no side effects and clear input output"
       ],
       "applies_when": [
         "function has clear inputs and outputs",
@@ -73,7 +74,8 @@
       "structural_signals": [
         "function with combinatorial input space",
         "need to document expected behavior as a truth table",
-        "testing a parser or transformer with varied inputs"
+        "testing a parser or transformer with varied inputs",
+        "combinatorial input space with tabular expected outputs"
       ],
       "applies_when": [
         "Go-style testing or when test data is tabular",
@@ -102,7 +104,8 @@
       "structural_signals": [
         "function has documented error conditions",
         "validation logic with rejection paths",
-        "error handling and graceful degradation"
+        "error handling and graceful degradation",
+        "error handling paths and exception conditions"
       ],
       "applies_when": [
         "function has explicit error handling paths",
@@ -132,7 +135,8 @@
         "async function or coroutine",
         "concurrent access to shared state",
         "callback-based or promise-based API",
-        "event-driven processing"
+        "event-driven processing",
+        "async function or coroutine with await points"
       ],
       "applies_when": [
         "code uses async/await, promises, or threads",
@@ -162,7 +166,8 @@
         "ORM or raw SQL queries",
         "database migration testing",
         "transaction rollback behavior",
-        "repository pattern with real data store"
+        "repository pattern with real data store",
+        "database queries or ORM operations against a real store"
       ],
       "applies_when": [
         "data access layer needs validation against real DB",
@@ -193,7 +198,8 @@
         "REST or GraphQL endpoint",
         "middleware chain processing",
         "authentication and authorization flow",
-        "request validation and response serialization"
+        "request validation and response serialization",
+        "REST or GraphQL endpoint handler with middleware"
       ],
       "applies_when": [
         "API contract must be verified end-to-end",
@@ -223,7 +229,8 @@
         "publish/subscribe messaging",
         "event-driven architecture",
         "message broker interaction",
-        "async event processing pipeline"
+        "async event processing pipeline",
+        "publish subscribe messaging or event-driven processing"
       ],
       "applies_when": [
         "message format and routing must be verified",
@@ -253,7 +260,8 @@
         "third-party API client",
         "external service dependency",
         "webhook handler",
-        "OAuth or external auth flow"
+        "OAuth or external auth flow",
+        "third-party API client or external service dependency"
       ],
       "applies_when": [
         "external API contract changes could break your code",
@@ -284,7 +292,8 @@
         "critical user journey",
         "main workflow from login to completion",
         "user story acceptance criteria",
-        "golden path through the application"
+        "golden path through the application",
+        "critical user journey through the full application"
       ],
       "applies_when": [
         "core user flow must never break",
@@ -315,7 +324,8 @@
         "checkout or payment flow",
         "user registration and onboarding",
         "data export or compliance workflow",
-        "mission-critical business process"
+        "mission-critical business process",
+        "payment flow or revenue-critical business process"
       ],
       "applies_when": [
         "failure has direct business impact",
@@ -345,7 +355,8 @@
         "web application with diverse browser support",
         "CSS or layout-sensitive features",
         "browser-specific API usage",
-        "mobile and desktop viewport testing"
+        "mobile and desktop viewport testing",
+        "web application supporting multiple browsers"
       ],
       "applies_when": [
         "application must support multiple browsers",
@@ -376,7 +387,8 @@
         "microservice consuming another service API",
         "multiple consumers of the same provider",
         "API versioning and backward compatibility",
-        "service boundary between teams"
+        "service boundary between teams",
+        "microservice API consumed by multiple downstream services"
       ],
       "applies_when": [
         "services are owned by different teams",
@@ -406,7 +418,8 @@
       "structural_signals": [
         "API provider serving multiple consumers",
         "provider-side verification of published contracts",
-        "backward compatibility check before deploy"
+        "backward compatibility check before deploy",
+        "API provider verifying backward compatibility before deploy"
       ],
       "applies_when": [
         "provider wants to verify it won't break consumers before deploying",
@@ -436,7 +449,9 @@
         "function with broad input domain",
         "invariant that must hold for all inputs",
         "serialization roundtrip",
-        "idempotent operation"
+        "idempotent operation",
+        "serialization roundtrip or encoding decoding symmetry",
+        "input space too large to enumerate but universal property exists"
       ],
       "applies_when": [
         "input space is large and edge cases are hard to enumerate",
@@ -467,7 +482,8 @@
         "stateful data structure with invariants",
         "sorted collection must stay sorted after mutations",
         "balance properties in trees or queues",
-        "state machine with known valid states"
+        "state machine with known valid states",
+        "stateful data structure with ordering or uniqueness invariants"
       ],
       "applies_when": [
         "system has well-defined invariants",
@@ -559,7 +575,8 @@
         "UI component rendering",
         "React/Vue/Svelte component output",
         "template rendering verification",
-        "component regression detection"
+        "component regression detection",
+        "UI component rendering output stability"
       ],
       "applies_when": [
         "component output should be stable",
@@ -590,7 +607,8 @@
         "API response structure verification",
         "JSON response body comparison",
         "GraphQL response shape testing",
-        "response format regression detection"
+        "response format regression detection",
+        "API response body format regression detection"
       ],
       "applies_when": [
         "API response format must remain stable",
@@ -621,7 +639,8 @@
         "system exposed to viral traffic patterns",
         "flash sale or event-driven traffic",
         "autoscaling validation",
-        "sudden burst of concurrent users"
+        "sudden burst of concurrent users",
+        "system exposed to sudden traffic spikes or viral load"
       ],
       "applies_when": [
         "system may face sudden traffic bursts",
@@ -651,7 +670,8 @@
         "long-running service",
         "suspected memory leak",
         "connection pool management",
-        "gradual performance degradation over time"
+        "gradual performance degradation over time",
+        "long-running service suspected of memory leaks"
       ],
       "applies_when": [
         "service runs for hours or days without restart",
@@ -682,7 +702,8 @@
         "finding system breaking point",
         "graceful degradation verification",
         "capacity planning",
-        "determining maximum throughput"
+        "determining maximum throughput",
+        "finding system breaking point and maximum throughput"
       ],
       "applies_when": [
         "need to know system limits",
@@ -712,7 +733,8 @@
         "SLA verification under load",
         "throughput ceiling determination",
         "performance budget validation",
-        "resource utilization profiling under load"
+        "resource utilization profiling under load",
+        "verifying SLA compliance under expected load"
       ],
       "applies_when": [
         "SLAs define latency and throughput targets",
@@ -742,7 +764,8 @@
         "source code with potential injection points",
         "user input flowing to sensitive sinks",
         "cryptographic operations in code",
-        "static security scanning in CI pipeline"
+        "static security scanning in CI pipeline",
+        "source code handling user input with potential injection"
       ],
       "applies_when": [
         "code handles user input",
@@ -772,7 +795,8 @@
         "web application with user-facing endpoints",
         "runtime vulnerability scanning",
         "penetration testing of deployed application",
-        "security assessment of running service"
+        "security assessment of running service",
+        "running web application needing runtime vulnerability scan"
       ],
       "applies_when": [
         "application is deployed or can be run locally",
@@ -803,7 +827,8 @@
         "third-party dependency management",
         "supply chain security concern",
         "CVE monitoring for dependencies",
-        "license compliance requirement"
+        "license compliance requirement",
+        "third-party dependencies needing CVE monitoring"
       ],
       "applies_when": [
         "project uses third-party packages",
@@ -864,7 +889,8 @@
         "web application with public users",
         "WCAG compliance requirement",
         "UI component accessibility validation",
-        "color contrast and ARIA attribute checking"
+        "color contrast and ARIA attribute checking",
+        "public web application requiring WCAG compliance"
       ],
       "applies_when": [
         "legal or ethical accessibility requirements",
@@ -924,7 +950,8 @@
         "UI with strict visual requirements",
         "design system component library",
         "CSS refactoring affecting layout",
-        "visual regression after dependency update"
+        "visual regression after dependency update",
+        "CSS refactoring or design system component visual consistency"
       ],
       "applies_when": [
         "visual fidelity is critical",
@@ -985,7 +1012,8 @@
         "OpenAPI or Swagger specification",
         "JSON Schema defined for payloads",
         "API contract compliance verification",
-        "schema drift detection"
+        "schema drift detection",
+        "OpenAPI schema defined for API contract compliance"
       ],
       "applies_when": [
         "API has a formal schema definition",
@@ -1015,7 +1043,8 @@
         "PUT or DELETE endpoint",
         "payment or order creation endpoint",
         "retry-safe API design",
-        "idempotency key handling"
+        "idempotency key handling",
+        "state-changing API endpoint that must be safely retried"
       ],
       "applies_when": [
         "API operations must be safely retried",
@@ -1045,7 +1074,8 @@
         "rate-limited API endpoint",
         "quota enforcement for API keys",
         "throttling configuration",
-        "429 status code handling"
+        "429 status code handling",
+        "rate-limited API endpoint with quota enforcement"
       ],
       "applies_when": [
         "API has rate limits configured",
@@ -1070,12 +1100,14 @@
       "id": "agent_prompt_regression",
       "name": "Agent Test — Prompt Regression",
       "category": "agent",
+      "agent_pattern": "prompt_regression",
       "description": "Run the same prompts against an agent across versions and measure output variance to detect unintended behavioral changes from prompt or model updates.",
       "structural_signals": [
         "LLM-based agent with versioned prompts",
         "system prompt changes affecting output",
         "model upgrade causing behavioral drift",
-        "agent output quality regression"
+        "agent output quality regression",
+        "LLM agent with versioned prompts being iterated"
       ],
       "applies_when": [
         "agent prompts are actively iterated",
@@ -1100,12 +1132,14 @@
       "id": "agent_tool_call_validation",
       "name": "Agent Test — Tool Call Validation",
       "category": "agent",
+      "agent_pattern": "tool_call_validation",
       "description": "Verify that an agent selects the correct tools, passes valid parameters, and invokes them in the right order for a given task.",
       "structural_signals": [
         "agent with tool/function calling capability",
         "tool selection accuracy",
         "parameter extraction from natural language",
-        "tool invocation ordering and dependencies"
+        "tool invocation ordering and dependencies",
+        "agent with multiple tools and function calling capability"
       ],
       "applies_when": [
         "agent has access to multiple tools",
@@ -1130,12 +1164,14 @@
       "id": "agent_multi_turn",
       "name": "Agent Test — Multi-Turn Consistency",
       "category": "agent",
+      "agent_pattern": "multi_turn_consistency",
       "description": "Test that an agent maintains coherent state, context, and personality across multiple conversation turns without contradiction or amnesia.",
       "structural_signals": [
         "conversational agent with memory",
         "multi-turn dialogue system",
         "context carryover across messages",
-        "agent state management across turns"
+        "agent state management across turns",
+        "conversational agent maintaining state across turns"
       ],
       "applies_when": [
         "agent engages in multi-turn conversations",
@@ -1160,12 +1196,14 @@
       "id": "agent_hallucination",
       "name": "Agent Test — Hallucination Detection",
       "category": "agent",
+      "agent_pattern": "hallucination_detection",
       "description": "Verify that agent outputs are factually grounded in provided context and do not fabricate information, citations, or capabilities.",
       "structural_signals": [
         "RAG-based agent with source documents",
         "factual accuracy requirement",
         "agent citing sources or references",
-        "knowledge-grounded generation"
+        "knowledge-grounded generation",
+        "RAG agent that must ground answers in provided documents"
       ],
       "applies_when": [
         "agent must only state facts from provided context",
@@ -1190,12 +1228,14 @@
       "id": "agent_determinism",
       "name": "Agent Test — Determinism",
       "category": "agent",
+      "agent_pattern": "determinism",
       "description": "Measure output variance across multiple runs of the same prompt to ensure acceptable consistency for production use.",
       "structural_signals": [
         "agent output must be reproducible",
         "temperature and sampling parameter tuning",
         "production reliability requirement",
-        "variance measurement across runs"
+        "variance measurement across runs",
+        "agent used in automated pipeline where output is parsed by code"
       ],
       "applies_when": [
         "deterministic outputs are required",
@@ -1220,12 +1260,14 @@
       "id": "agent_token_budget",
       "name": "Agent Test — Token Budget",
       "category": "agent",
+      "agent_pattern": "token_budget",
       "description": "Verify that agent prompts, contexts, and responses stay within token limits to avoid truncation and control costs.",
       "structural_signals": [
         "large context injection into prompts",
         "RAG retrieval with many documents",
         "token cost optimization",
-        "context window approaching limits"
+        "context window approaching limits",
+        "agent with large context injection approaching token limits"
       ],
       "applies_when": [
         "token costs must be controlled",
@@ -1250,12 +1292,14 @@
       "id": "agent_safety",
       "name": "Agent Test — Safety/Guardrail",
       "category": "agent",
+      "agent_pattern": "safety_guardrail",
       "description": "Test that an agent refuses harmful requests, resists jailbreak attempts, and stays within defined behavioral boundaries.",
       "structural_signals": [
         "public-facing AI agent",
         "content moderation requirements",
         "jailbreak resistance testing",
-        "safety guardrail enforcement"
+        "safety guardrail enforcement",
+        "public-facing AI agent needing content safety guardrails"
       ],
       "applies_when": [
         "agent is user-facing and could be abused",
@@ -1280,12 +1324,14 @@
       "id": "agent_chain",
       "name": "Agent Test — Chain/Pipeline",
       "category": "agent",
+      "agent_pattern": "agent_chain_integrity",
       "description": "Test multi-agent pipelines where output of one agent feeds into another, verifying end-to-end pipeline integrity and error propagation.",
       "structural_signals": [
         "multi-agent orchestration",
         "agent pipeline with handoffs",
         "chained LLM calls",
-        "output of one agent as input to another"
+        "output of one agent as input to another",
+        "multi-agent pipeline with sequential handoffs between agents"
       ],
       "applies_when": [
         "multiple agents are chained together",
@@ -1310,12 +1356,14 @@
       "id": "agent_stream_validation",
       "name": "Agent Test — Stream Validation",
       "category": "agent",
+      "agent_pattern": "stream_validation",
       "description": "Verify that streamed agent responses are complete, properly chunked, and that partial outputs are valid at every point.",
       "structural_signals": [
         "server-sent events or WebSocket streaming",
         "chunked response delivery",
         "streaming token output",
-        "partial response rendering"
+        "partial response rendering",
+        "agent responses streamed via SSE or WebSocket to client"
       ],
       "applies_when": [
         "agent responses are streamed to clients",
@@ -1340,12 +1388,14 @@
       "id": "agent_latency_profiling",
       "name": "Agent Test — Latency Profiling",
       "category": "agent",
+      "agent_pattern": "latency_profiling",
       "description": "Measure response time distribution across agent calls, identifying p50/p95/p99 latencies and detecting timeout-prone prompts.",
       "structural_signals": [
         "agent response time SLA",
         "latency-sensitive user interaction",
         "timeout configuration validation",
-        "performance regression in agent responses"
+        "performance regression in agent responses",
+        "agent with response time SLA or latency-sensitive interaction"
       ],
       "applies_when": [
         "agent has latency SLAs",
@@ -1370,12 +1420,14 @@
       "id": "agent_context_window",
       "name": "Agent Test — Context Window Management",
       "category": "agent",
+      "agent_pattern": "context_window_management",
       "description": "Test agent behavior as conversation history approaches context window limits, verifying graceful summarization or truncation.",
       "structural_signals": [
         "long conversation sessions",
         "context window nearing capacity",
         "summarization or truncation strategy",
-        "conversation history management"
+        "conversation history management",
+        "agent handling long conversations near context window capacity"
       ],
       "applies_when": [
         "agents handle long conversations",
@@ -1400,12 +1452,14 @@
       "id": "agent_grounding",
       "name": "Agent Test — Grounding/Citation Accuracy",
       "category": "agent",
+      "agent_pattern": "grounding_accuracy",
       "description": "Verify that agent-generated citations, references, and source attributions accurately correspond to the content they claim to reference.",
       "structural_signals": [
         "RAG with citation requirements",
         "source attribution in responses",
         "reference verification",
-        "knowledge base lookup accuracy"
+        "knowledge base lookup accuracy",
+        "RAG agent providing citations that must reference real sources"
       ],
       "applies_when": [
         "agent must cite sources accurately",

@@ -12,6 +12,7 @@ from typing import Any, Union
 
 from fastmcp import FastMCP
 
+from themis.tools.get_signal_index import get_signal_index as _get_signal_index
 from themis.tools.plan_test_strategy import plan_test_strategy as _plan_test_strategy
 from themis.tools.judge_output import judge_output as _judge_output
 from themis.tools.run_agent_test import run_agent_test as _run_agent_test
@@ -40,6 +41,27 @@ mcp = FastMCP("themis", instructions=(
 # ---------------------------------------------------------------------------
 
 @mcp.tool()
+def get_signal_index(conn: Any = None) -> dict:
+    """Return Themis's recognition vocabulary as a nested two-view signal index.
+
+    The reachable-by-construction entry point to the retrieval engine: the LLM
+    recognises a problem's structural signals against the relevant labelled surface,
+    then passes the matched signal ids to plan_test_strategy / evaluate_coverage
+    (which hydrate through the engine). This tool only exposes the views; it does no
+    matching itself.
+
+    Args:
+        conn: Kuzu/LadybugDB connection for graph mode (injected by Othrys). None ->
+            the JSON singleton loader.
+
+    Returns: {strategy_signals: [{signal_id, signal_text, strategy_ids}],
+              pattern_signals: [{signal_id, signal_text, pattern_ids}]} — each view
+              sorted by signal_id with sorted id-lists (byte-stable).
+    """
+    return _get_signal_index(conn=conn)
+
+
+@mcp.tool()
 def plan_test_strategy(
     system_description: str,
     structural_signals: Union[list[str], str],
@@ -48,22 +70,24 @@ def plan_test_strategy(
 ) -> dict:
     """Analyze a system and recommend the right testing strategy.
 
-    Given a description of what to test and structural signals about its
-    architecture, returns prioritized test categories, recommended frameworks,
-    and specific test case outlines.
+    Recognise the system's structural signals against get_signal_index, then pass
+    the matched signal ids here: the tool hydrates them into ranked strategies +
+    agent patterns through the retrieval engine, reasoning over each node's OWN
+    fields.
 
     Args:
         system_description: What the system does, its inputs/outputs, and
-            architecture (the more specific, the better Themis's judgment).
-        structural_signals: List of signals about the system's nature, e.g.
-            ["async_pipeline", "user_input_validation", "database_writes",
-             "agent_output", "rate_limited"].
-        constraints: Optional dict of constraints like {"framework": "pytest",
-            "time_budget_minutes": 30, "environment": "ci"}.
+            architecture — context/telemetry (retrieval is driven by the signal ids).
+        structural_signals: The matched SIGNAL IDS recognised against
+            get_signal_index (e.g. ["sig-04591c9f637f", ...]), not prose.
+        constraints: Optional dict read by the constraint gate — keys language/
+            category/max_setup/max_maintenance/max_execution/agent_testing_support.
         conn: Kuzu/LadybugDB connection for graph mode (injected by Othrys).
 
-    Returns: {strategies: [...], frameworks: [...], test_cases: [...],
-              coverage_targets: [...], priority_order: [...]}
+    Returns: {recommended_strategies (each with its own complexity/
+              compatible_frameworks/applies_when/avoid_when/trade_offs), frameworks,
+              alternatives, filtered_out, retrieval_state, agent_pattern_state,
+              unmatched_signals, dangling, agent_patterns?}
     """
     return _plan_test_strategy(
         system_description=system_description,
@@ -145,31 +169,42 @@ async def run_agent_test(
 
 @mcp.tool()
 def evaluate_coverage(
-    test_descriptions: Union[list[str], str],
+    test_descriptions: Union[list[dict], str],
     system_description: str,
     structural_signals: Union[list[str], str],
+    k: int = 10,
     conn: Any = None,
 ) -> dict:
-    """Evaluate how well existing tests cover a system.
+    """Measure test-coverage gaps against the reachable knowledge-base corpus.
 
-    Compares what IS tested against what SHOULD be tested. Identifies
-    gaps, redundancies, and priorities for new tests.
+    Recognise the system's structural signals against get_signal_index, then pass
+    the matched signal ids here: the tool hydrates them into the strategies and
+    agent patterns actually recommended for those signals and names the real corpus
+    nodes an existing suite leaves uncovered — not a hardcoded category rubric alone.
 
     Args:
-        test_descriptions: List of plain-English descriptions of existing
-            tests (e.g. ["tests login with valid credentials",
-            "tests rate limit returns 429"]).
-        system_description: Description of the system being tested.
-        structural_signals: List of architectural signals about the system.
+        test_descriptions: List of dicts describing existing tests, each with
+            ``name``, ``category``, and ``what_it_tests``.
+        system_description: What the system does — context/telemetry (the reachable
+            corpus is driven by the signal ids).
+        structural_signals: The matched SIGNAL IDS recognised against
+            get_signal_index (e.g. ["sig-04591c9f637f", ...]), not prose. An empty
+            list is honest "no signals recognised" — the rubric scoring lens still
+            runs; the corpus contributes nothing (fail-closed).
+        k: Number of ranked strategies/patterns to retrieve (engine-clamped 1..50).
         conn: Kuzu/LadybugDB connection for graph mode (injected by Othrys).
 
-    Returns: {coverage_score: 0.0-1.0, covered: [...], gaps: [...],
-              redundant: [...], recommendations: [...]}
+    Returns: {coverage_by_category (rubric weights + corpus strategies per category),
+              missing_strategies (real corpus strategy nodes uncovered), risk_areas
+              (real agent-pattern nodes with their own severity + rubric-gap
+              categories), recommendations, summary, retrieval_state,
+              agent_pattern_state, unmatched_signals, dangling}
     """
     return _evaluate_coverage(
         test_descriptions=coerce(test_descriptions, list),
         system_description=system_description,
         structural_signals=coerce(structural_signals, list),
+        k=k,
         conn=conn,
     )
 

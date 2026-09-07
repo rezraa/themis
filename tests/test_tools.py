@@ -13,54 +13,72 @@ from themis.tools.log_verdict import log_verdict
 
 
 class TestPlanTestStrategy:
-    """Test the strategy planning tool."""
+    """Test the strategy planning tool (S3: retrofitted onto the hydrate seams).
+
+    Callers now pass the SIGNAL IDS recognised against get_signal_index (not prose);
+    the tool hydrates them into strategies + agent patterns and reasons over each
+    node's OWN fields. Ids are drawn from the accessor's own output (Directive 8).
+    """
+
+    def _strategy_ids(self, strategy_id: str, n: int = 2) -> list[str]:
+        from themis.tools.get_signal_index import get_signal_index
+        idx = get_signal_index()
+        return [e["signal_id"] for e in idx["strategy_signals"]
+                if strategy_id in e["strategy_ids"]][:n]
 
     def test_matches_unit_test_signals(self):
         result = plan_test_strategy(
             system_description="Pure function that validates email addresses",
-            structural_signals=["testing isolated function logic with known inputs"],
+            structural_signals=self._strategy_ids("unit_isolation"),
         )
-        assert len(result["matched_rules"]) >= 1
-        rule = result["matched_rules"][0]
-        assert rule["rule_id"] == "rule_001"
-        assert rule["recommended"] == "unit_parameterized"
+        assert result["retrieval_state"] in ("hit", "low_confidence")
+        assert any(r["strategy_id"] == "unit_isolation"
+                   for r in result["recommended_strategies"])
+        # The recommended strategy carries its OWN why-fields (no rule-provenance block).
+        ui = next(r for r in result["recommended_strategies"]
+                  if r["strategy_id"] == "unit_isolation")
+        assert ui["applies_when"] and ui["avoid_when"] and ui["trade_offs"]
 
     def test_returns_strategies_and_frameworks(self):
         result = plan_test_strategy(
             system_description="REST API with database",
-            structural_signals=["testing isolated function logic"],
+            structural_signals=self._strategy_ids("unit_isolation"),
         )
         assert "recommended_strategies" in result
         assert "frameworks" in result
+        assert result["frameworks"]  # union of the strategies' compatible_frameworks
 
     def test_detects_agent_patterns(self):
-        # Agent patterns trigger on hyphenated signal keywords like "tool-use", "multi-turn"
+        from themis.tools.get_signal_index import get_signal_index
+        idx = get_signal_index()
+        pat = idx["pattern_signals"][0]
         result = plan_test_strategy(
             system_description="AI agent that calls tools and generates responses",
-            structural_signals=["tool-use", "multi-turn"],
+            structural_signals=[pat["signal_id"]],
         )
         assert "agent_patterns" in result
-        assert len(result["agent_patterns"]) >= 2
-        pattern_names = [p["pattern"] for p in result["agent_patterns"]]
-        assert "tool_call_validation" in pattern_names
-        assert "conversation_coherence" in pattern_names
+        got = {p["pattern_id"] for p in result["agent_patterns"]}
+        assert set(pat["pattern_ids"]) <= got
+        # Rich corpus fields the deleted island never carried.
+        block = result["agent_patterns"][0]
+        assert block["test_approach"] and block["metrics"] and block["severity"]
 
     def test_empty_signals_returns_empty(self):
         result = plan_test_strategy(
             system_description="Something",
             structural_signals=[],
         )
-        assert result["matched_rules"] == []
+        assert "matched_rules" not in result
+        assert result["recommended_strategies"] == []
+        assert result["retrieval_state"] == "no_match"
 
     def test_constraints_filter(self):
         result = plan_test_strategy(
             system_description="Fast API endpoint",
-            structural_signals=["testing isolated function logic with known inputs"],
-            constraints={"max_setup_complexity": "low"},
+            structural_signals=self._strategy_ids("unit_isolation"),
+            constraints={"max_setup": "low"},
         )
-        # plan_test_strategy filters by its own complexity logic
-        # Verify the result structure is valid
-        assert "matched_rules" in result
+        # Constraint gate reads each strategy's OWN nested complexity.
         assert "recommended_strategies" in result
         assert "filtered_out" in result
 
@@ -259,7 +277,13 @@ class TestTokenOverlap:
 
 
 class TestEvaluateCoverage:
-    """Test the coverage evaluation tool."""
+    """Test the coverage evaluation tool.
+
+    Post-S4 contract: ``structural_signals`` carries the matched SIGNAL IDS
+    recognised against get_signal_index (an empty list runs the rubric scoring lens
+    only). These cover the rubric-lens arithmetic; the corpus-reach behaviour has its
+    own gate in test_s4_evaluate_coverage_retrofit.py.
+    """
 
     def test_finds_gaps(self):
         result = evaluate_coverage(
@@ -267,6 +291,7 @@ class TestEvaluateCoverage:
                 {"name": "test_login", "category": "functional", "what_it_tests": "login"},
             ],
             system_description="Web app with auth, API, and database",
+            structural_signals=[],
         )
         assert len(result["risk_areas"]) > 0
         assert "recommendations" in result
@@ -281,6 +306,7 @@ class TestEvaluateCoverage:
                 ]
             ],
             system_description="Some system",
+            structural_signals=[],
         )
         assert result["coverage_by_category"] is not None
 

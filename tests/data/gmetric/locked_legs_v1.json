@@ -1,0 +1,44 @@
+{
+  "baseline_snapshot": {
+    "by_stratum_recall_at_10": {
+      "P-PL": 0.0,
+      "P-V": 0.0,
+      "S-PL": 0.0,
+      "S-V": 0.6
+    },
+    "by_target_recall_at_10": {
+      "pattern": 0.0,
+      "strategy": 0.3
+    }
+  },
+  "invariants": [
+    "result_core_sha256 byte-identical across 3 fresh loaders + PYTHONHASHSEED flip",
+    "empty matched_signal_ids -> NO_MATCH on every arm (baseline proven at S0)",
+    "answer key byte-frozen; --refreeze the sole mutation path (CWE-345 fail-closed)"
+  ],
+  "legs": {
+    "LEG_1_no_regression": {
+      "baseline_by_stratum": {
+        "P-PL": 0.0,
+        "P-V": 0.0,
+        "S-PL": 0.0,
+        "S-V": 0.6
+      },
+      "one_sided_gain_inspection": true,
+      "rule": "engine recall@10 >= baseline recall@10 on EVERY stratum"
+    },
+    "LEG_2_strategy_problem_language_lift": {
+      "baseline": 0.0,
+      "min_delta": 0.3,
+      "rule": "S-PL recall@10(engine) - baseline >= 0.30"
+    },
+    "LEG_3_agent_pattern_reach": {
+      "baseline": 0.0,
+      "floor": 0.4,
+      "rule": "pattern-target recall@10(engine) >= 0.40"
+    }
+  },
+  "set_after_baseline": true,
+  "story": "story-350b3817",
+  "version": "v1"
+}

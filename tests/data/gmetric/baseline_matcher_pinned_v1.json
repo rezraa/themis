@@ -1,0 +1,665 @@
+{
+  "RESULT_baseline": {
+    "by_register": {
+      "problem_language": {
+        "10": {
+          "covered": 0,
+          "of": 18,
+          "recall": 0.0
+        },
+        "5": {
+          "covered": 0,
+          "of": 18,
+          "recall": 0.0
+        }
+      },
+      "verbatim": {
+        "10": {
+          "covered": 6,
+          "of": 18,
+          "recall": 0.3333
+        },
+        "5": {
+          "covered": 6,
+          "of": 18,
+          "recall": 0.3333
+        }
+      }
+    },
+    "by_stratum": {
+      "P-PL": {
+        "10": {
+          "covered": 0,
+          "of": 8,
+          "recall": 0.0
+        },
+        "5": {
+          "covered": 0,
+          "of": 8,
+          "recall": 0.0
+        }
+      },
+      "P-V": {
+        "10": {
+          "covered": 0,
+          "of": 8,
+          "recall": 0.0
+        },
+        "5": {
+          "covered": 0,
+          "of": 8,
+          "recall": 0.0
+        }
+      },
+      "S-PL": {
+        "10": {
+          "covered": 0,
+          "of": 10,
+          "recall": 0.0
+        },
+        "5": {
+          "covered": 0,
+          "of": 10,
+          "recall": 0.0
+        }
+      },
+      "S-V": {
+        "10": {
+          "covered": 6,
+          "of": 10,
+          "recall": 0.6
+        },
+        "5": {
+          "covered": 6,
+          "of": 10,
+          "recall": 0.6
+        }
+      }
+    },
+    "by_target": {
+      "pattern": {
+        "10": {
+          "covered": 0,
+          "of": 16,
+          "recall": 0.0
+        },
+        "5": {
+          "covered": 0,
+          "of": 16,
+          "recall": 0.0
+        }
+      },
+      "strategy": {
+        "10": {
+          "covered": 6,
+          "of": 20,
+          "recall": 0.3
+        },
+        "5": {
+          "covered": 6,
+          "of": 20,
+          "recall": 0.3
+        }
+      }
+    },
+    "denominator_E_golds": 36,
+    "method": "match_structural_signals",
+    "per_problem": {
+      "P01": {
+        "grades": {
+          "10": {
+            "covered": 1
+          },
+          "5": {
+            "covered": 1
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [
+          "sig-f6ec85272a17",
+          "sig-f126ec7e824b",
+          "sig-b77ee6299c84",
+          "sig-5b99a824a019",
+          "sig-6e669b876558",
+          "sig-c37a8251cefa",
+          "sig-bbee0c094d6d",
+          "sig-4903554e5101",
+          "sig-4d5e6ba4037a",
+          "sig-bcfce1f4df7a"
+        ],
+        "stratum": "S-V"
+      },
+      "P02": {
+        "grades": {
+          "10": {
+            "covered": 1
+          },
+          "5": {
+            "covered": 1
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [
+          "sig-f6ec85272a17",
+          "sig-f126ec7e824b",
+          "sig-b77ee6299c84",
+          "sig-5b99a824a019",
+          "sig-6e669b876558",
+          "sig-c37a8251cefa",
+          "sig-bbee0c094d6d"
+        ],
+        "stratum": "S-V"
+      },
+      "P03": {
+        "grades": {
+          "10": {
+            "covered": 1
+          },
+          "5": {
+            "covered": 1
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [
+          "sig-8a174aea0d0f",
+          "sig-3ea0359143e8",
+          "sig-2377ced668f1",
+          "sig-a416138586af",
+          "sig-f6ec85272a17",
+          "sig-f126ec7e824b",
+          "sig-b77ee6299c84",
+          "sig-5b99a824a019"
+        ],
+        "stratum": "S-V"
+      },
+      "P04": {
+        "grades": {
+          "10": {
+            "covered": 1
+          },
+          "5": {
+            "covered": 1
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [
+          "sig-f4ff23117b1f",
+          "sig-a5311c0a2314",
+          "sig-55041b6c9958",
+          "sig-46571cc6229a",
+          "sig-5fa2b92c46b6",
+          "sig-bcc431ae643a",
+          "sig-a22876b72531",
+          "sig-2270170a32d9",
+          "sig-597680fc8daa",
+          "sig-abd80b1dd440"
+        ],
+        "stratum": "S-V"
+      },
+      "P05": {
+        "grades": {
+          "10": {
+            "covered": 1
+          },
+          "5": {
+            "covered": 1
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [
+          "sig-d2cce3c62d42",
+          "sig-6227ec2176e6",
+          "sig-df5c9282af58",
+          "sig-e97d685d7d78",
+          "sig-daadf5996ab0",
+          "sig-d84aff699748",
+          "sig-e5c44d86ddff",
+          "sig-96b69df40760"
+        ],
+        "stratum": "S-V"
+      },
+      "P06": {
+        "grades": {
+          "10": {
+            "covered": 1
+          },
+          "5": {
+            "covered": 1
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [
+          "sig-d6056082f542",
+          "sig-2f3202f8450d",
+          "sig-a19af42cf05c",
+          "sig-2b4d02583340",
+          "sig-89ce3eaa08c1",
+          "sig-151c0db47011",
+          "sig-785f23cd910b",
+          "sig-bd582ca9f9ab",
+          "sig-f4ff23117b1f",
+          "sig-a5311c0a2314"
+        ],
+        "stratum": "S-V"
+      },
+      "P07": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "S-V"
+      },
+      "P08": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "S-V"
+      },
+      "P09": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "S-V"
+      },
+      "P10": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "S-V"
+      },
+      "P11": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "S-PL"
+      },
+      "P12": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "S-PL"
+      },
+      "P13": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "S-PL"
+      },
+      "P14": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "S-PL"
+      },
+      "P15": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "S-PL"
+      },
+      "P16": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "S-PL"
+      },
+      "P17": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "S-PL"
+      },
+      "P18": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "S-PL"
+      },
+      "P19": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "S-PL"
+      },
+      "P20": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "S-PL"
+      },
+      "P21": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "P-V"
+      },
+      "P22": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [
+          "sig-abed3a8b2361",
+          "sig-7ceb84c379c4",
+          "sig-8882f96489c0",
+          "sig-b87ea3a191fb",
+          "sig-7a5141655cbe",
+          "sig-c439d470b746",
+          "sig-1ab4dbf11f18",
+          "sig-25243d8ce9a6",
+          "sig-82af0419b825",
+          "sig-364d24520a86"
+        ],
+        "stratum": "P-V"
+      },
+      "P23": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "P-V"
+      },
+      "P24": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [
+          "sig-4391843006bd",
+          "sig-f46d8f6387ff",
+          "sig-4b96afe90645",
+          "sig-7e0ae741e1fe",
+          "sig-ff69219268f3",
+          "sig-83f6b2bda77f",
+          "sig-6359c44e35fd",
+          "sig-b564d11dcaf9"
+        ],
+        "stratum": "P-V"
+      },
+      "P25": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "P-V"
+      },
+      "P26": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "P-V"
+      },
+      "P27": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "P-V"
+      },
+      "P28": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "P-V"
+      },
+      "P29": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "P-PL"
+      },
+      "P30": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "P-PL"
+      },
+      "P31": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "P-PL"
+      },
+      "P32": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "P-PL"
+      },
+      "P33": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "P-PL"
+      },
+      "P34": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "P-PL"
+      },
+      "P35": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "P-PL"
+      },
+      "P36": {
+        "grades": {
+          "10": {
+            "covered": 0
+          },
+          "5": {
+            "covered": 0
+          }
+        },
+        "n_acceptable": 1,
+        "ranked_top10": [],
+        "stratum": "P-PL"
+      }
+    },
+    "pooled_do_not_use": {
+      "10": 0.1667,
+      "5": 0.1667
+    }
+  },
+  "answer_key_sha256": "94907b2999565b92925e9a08cfee9e82ad8183a9473fd84dec9cd135c909f5e8",
+  "result_core_sha256": "8572d93d96dac2f9156951762acadafc93cbfd1939a638dcece22e0e2dd764fe",
+  "story": "story-350b3817",
+  "version": "v1"
+}

@@ -1,172 +1,147 @@
 # Copyright (c) 2026 Reza Malik. Licensed under the Apache License, Version 2.0.
-"""MCP tool: plan_test_strategy
+"""MCP tool: plan_test_strategy — wired onto the Shape-C retrieval engine.
 
-Recommend testing strategies based on agent-identified structural signals,
-system description, and optional constraints.
+Recommend testing strategies for the signals a caller recognised against
+``get_signal_index``. The tool follows the cross-titan retrofit template
+(retrieve -> gate -> reason over each node's OWN fields -> four-state envelope;
+council 25d9a8ea / m-6ce2dcc3):
 
-The agent (LLM) reads the system/code and identifies testing signals.  This
-tool matches those signals against decision_rules.json, retrieves knowledge
-slices, filters by constraints (language, max_setup_complexity, etc.), and
-detects agent-specific testing patterns.
+1. RETRIEVE strategies through one ``kb.hydrate`` call over the strategy-signal
+   view — the proven four-state, fail-closed envelope; ``no_match``/``dangling``
+   abstain to empty lists, never a husk. The corpus's own 226-signal vocabulary is
+   the single source of truth (the legacy substring matcher over the decision-rules
+   table was deleted at S5, once this tool and evaluate_coverage reached it through
+   the hydrate path instead).
+2. GATE the retrieved strategies through ``kb.filter_by_constraints`` — the ONE
+   constraint gate, reading each strategy's OWN nested ``complexity``
+   {setup, maintenance, execution} and ``compatible_frameworks`` (the excluded set
+   survives as ``filtered_out`` with its reason).
+3. REASON over each surviving strategy's OWN fields — real ``complexity``,
+   ``compatible_frameworks``, ``applies_when``/``avoid_when``/``trade_offs`` (these
+   are the strategy's own "why", so no separate rule-provenance block is emitted) —
+   and detect agent testing patterns through a SECOND hydrate over the agent-pattern
+   view (``kb.hydrate_patterns``), surfacing the rich corpus block (``test_approach``,
+   ``example_test_case``, ``metrics``, ``severity``, ``adapters``).
+
+The retrofit fixes two wrong-field reads the live path always defaulted:
+``complexity`` was read as a phantom flat ``setup_complexity`` (always "medium"), and
+top-level ``frameworks`` was read as a phantom ``frameworks`` key (always empty — the
+real field is ``compatible_frameworks``). It also DELETES the hardcoded
+agent-signal/agent-pattern island, whose 12 stub patterns shadowed the 60-signal
+agent_patterns.json corpus and carried none of its fields; agent-pattern detection now
+flows through the loader's real agent-pattern methods.
+
+The two MCP-boundary params stay honestly required with the fail-loud +
+lone-stray-string recovery bound by test_tool_hardening.py. ``structural_signals``
+now carries the matched SIGNAL IDS the caller recognised against
+``get_signal_index`` (problem-language -> sig-id, the reachable path), not prose.
+
+Firewall: imports only themis.* — never othrys.*/coeus.*/mnemos.*/theia.*.
 """
 
 from __future__ import annotations
 
 from typing import Any
 
-from themis.tools._shared import coerce, emit_event, get_knowledge
+from themis.knowledge.loader import DANGLING, NO_MATCH
+from themis.tools._shared import (
+    _MAX_MATCHED_SIGNALS,
+    _bounded_constraints,
+    coerce,
+    emit_event,
+    get_knowledge,
+)
 
 # Sentinel distinguishing "argument omitted" from an explicit None/empty value,
 # so a missing required signal fails loud instead of silently defaulting.
 _MISSING = object()
 
-# ---------------------------------------------------------------------------
-# Agent testing signal keywords — triggers agent_patterns in output
-# ---------------------------------------------------------------------------
 
-_AGENT_SIGNALS: set[str] = {
-    "tool-use",
-    "multi-turn",
-    "chain-of-thought",
-    "planning",
-    "retrieval-augmented",
-    "function-calling",
-    "streaming",
-    "context-window",
-    "guardrails",
-    "hallucination-risk",
-    "token-budget",
-    "latency-sensitive",
-    "multi-agent",
-    "memory-persistence",
-    "role-adherence",
-}
+def _strategy_view(s: dict) -> dict:
+    """Project a hydrated strategy onto the tool's output surface — OWN fields only.
 
-# Built-in agent testing patterns — returned when agent signals are detected
-_AGENT_PATTERNS: dict[str, dict[str, Any]] = {
-    "tool-use": {
-        "pattern": "tool_call_validation",
-        "description": "Validate that the agent calls the correct tools with correct arguments",
-        "strategies": ["exact_tool_match", "argument_schema_check", "tool_sequence_order"],
-    },
-    "multi-turn": {
-        "pattern": "conversation_coherence",
-        "description": "Test that multi-turn context is maintained across exchanges",
-        "strategies": ["context_retention", "reference_resolution", "state_tracking"],
-    },
-    "chain-of-thought": {
-        "pattern": "reasoning_trace",
-        "description": "Validate reasoning steps are present and logically sound",
-        "strategies": ["step_count_check", "logical_flow", "conclusion_grounding"],
-    },
-    "function-calling": {
-        "pattern": "function_call_validation",
-        "description": "Validate function call format, argument types, and return handling",
-        "strategies": ["schema_compliance", "error_handling", "return_processing"],
-    },
-    "streaming": {
-        "pattern": "stream_integrity",
-        "description": "Validate streaming responses are complete and well-formed",
-        "strategies": ["chunk_completeness", "final_assembly", "timeout_handling"],
-    },
-    "hallucination-risk": {
-        "pattern": "factual_grounding",
-        "description": "Check outputs against known facts and source material",
-        "strategies": ["source_attribution", "claim_verification", "refusal_on_unknown"],
-    },
-    "token-budget": {
-        "pattern": "budget_compliance",
-        "description": "Verify agent stays within token/cost budgets",
-        "strategies": ["token_counting", "cost_estimation", "truncation_check"],
-    },
-    "latency-sensitive": {
-        "pattern": "latency_profiling",
-        "description": "Measure and validate response latency against SLAs",
-        "strategies": ["p50_p99_measurement", "timeout_enforcement", "degradation_curve"],
-    },
-    "guardrails": {
-        "pattern": "safety_boundary",
-        "description": "Test that guardrails prevent disallowed outputs",
-        "strategies": ["injection_resistance", "role_boundary", "output_filtering"],
-    },
-    "multi-agent": {
-        "pattern": "orchestration_validation",
-        "description": "Validate multi-agent coordination, handoffs, and results",
-        "strategies": ["handoff_correctness", "result_aggregation", "deadlock_detection"],
-    },
-    "memory-persistence": {
-        "pattern": "memory_integrity",
-        "description": "Test that agent memory persists correctly across sessions",
-        "strategies": ["recall_accuracy", "decay_behaviour", "conflict_resolution"],
-    },
-    "role-adherence": {
-        "pattern": "persona_consistency",
-        "description": "Validate the agent maintains its assigned role/persona",
-        "strategies": ["tone_check", "boundary_enforcement", "instruction_following"],
-    },
-}
-
-# ---------------------------------------------------------------------------
-# Constraint filters
-# ---------------------------------------------------------------------------
-
-_COMPLEXITY_RANK: dict[str, int] = {
-    "trivial": 0,
-    "low": 1,
-    "medium": 2,
-    "high": 3,
-    "extreme": 4,
-}
+    Reads each field the node genuinely carries: real nested ``complexity``
+    (not a phantom flat ``setup_complexity``), ``compatible_frameworks`` (not a
+    phantom ``frameworks`` key), and the ``applies_when``/``avoid_when``/
+    ``trade_offs`` reasoning fields. Nested containers are copied to plain
+    dict/list so the frozen singleton corpus is never aliased into the result.
+    """
+    return {
+        "strategy_id": s.get("id", ""),
+        "name": s.get("name", s.get("id", "")),
+        "category": s.get("category", ""),
+        "description": s.get("description", ""),
+        "complexity": dict(s.get("complexity") or {}),
+        "compatible_frameworks": list(s.get("compatible_frameworks") or []),
+        "applies_when": list(s.get("applies_when") or []),
+        "avoid_when": list(s.get("avoid_when") or []),
+        "trade_offs": list(s.get("trade_offs") or []),
+        "confidence": s.get("confidence", ""),
+        "alternatives": list(s.get("alternatives") or []),
+        "agent_pattern": s.get("agent_pattern", ""),
+        "retrieval": dict(s.get("retrieval") or {}),
+    }
 
 
-def _complexity_ok(strategy_complexity: str, max_allowed: str) -> bool:
-    """Return True if the strategy complexity is within the allowed threshold."""
-    s = _COMPLEXITY_RANK.get(strategy_complexity.lower(), 2)
-    m = _COMPLEXITY_RANK.get(max_allowed.lower(), 4)
-    return s <= m
+def _agent_pattern_view(p: dict) -> dict:
+    """Project a hydrated agent pattern onto the output surface — OWN corpus fields.
 
+    Surfaces the rich agent_patterns.json block the deleted hardcoded island never
+    carried: ``test_approach``, ``example_test_case``, ``metrics``, ``severity``,
+    ``adapters``. Nested containers copied to plain dict/list.
+    """
+    return {
+        "pattern_id": p.get("id", ""),
+        "name": p.get("name", p.get("id", "")),
+        "description": p.get("description", ""),
+        "test_approach": p.get("test_approach", ""),
+        "example_test_case": dict(p.get("example_test_case") or {}),
+        "metrics": list(p.get("metrics") or []),
+        "severity": p.get("severity", ""),
+        "adapters": list(p.get("adapters") or []),
+        "signals": list(p.get("signals") or []),
+        "retrieval": dict(p.get("retrieval") or {}),
+    }
 
-def _language_ok(strategy: dict[str, Any], language: str) -> bool:
-    """Return True if the strategy supports the given language."""
-    supported = strategy.get("languages")
-    if not supported:
-        return True  # language-agnostic strategy
-    return language.lower() in [lang.lower() for lang in supported]
-
-
-# ---------------------------------------------------------------------------
-# Main tool
-# ---------------------------------------------------------------------------
 
 def plan_test_strategy(
     system_description: Any = _MISSING,
     structural_signals: Any = _MISSING,
     constraints: dict | None = None,
+    k: int = 10,
     conn: object = None,
     **extra: Any,
 ) -> dict:
-    """Recommend testing strategies based on structural signals and constraints.
+    """Recommend testing strategies for a caller's matched signal ids.
 
     Args:
-        system_description: Description of what needs testing — the system,
-            API, agent, or code under test.
-        structural_signals: Agent-identified signals, e.g.
-            ["tool-use", "multi-turn", "latency-sensitive", "rest-api"].
-            Required — a missing value raises rather than silently defaulting,
-            since an empty signal set would mask a caller bug.
-        constraints: Optional dict with keys like ``language``,
-            ``max_setup_complexity`` ("low"/"medium"/"high"/"extreme"),
-            ``max_strategies`` (int), ``framework_preference`` (str).
+        system_description: Description of what needs testing — context/telemetry
+            only (retrieval is driven by ``structural_signals``, not this text).
+        structural_signals: The matched SIGNAL IDS the caller recognised against
+            ``get_signal_index`` (e.g. ["sig-04591c9f637f", ...]). Required — a
+            missing value raises rather than silently defaulting, since an empty
+            signal set would mask a caller bug. Ids the index does not recognise are
+            surfaced in ``unmatched_signals`` and the leg abstains, never a husk.
+        constraints: Optional dict read by ``kb.filter_by_constraints`` — keys
+            ``language``/``category``/``max_setup``/``max_maintenance``/
+            ``max_execution``/``agent_testing_support``. Bounded at the boundary.
+        k: Number of ranked strategies/patterns to retrieve (engine-clamped 1..50).
         conn: Kuzu/LadybugDB connection for graph mode, or None for JSON.
 
     Returns:
-        Dict with keys: matched_rules, recommended_strategies, frameworks,
-        alternatives, filtered_out, agent_patterns (if agent signals found).
+        Dict with ``recommended_strategies`` (each with its OWN
+        complexity/compatible_frameworks/applies_when/avoid_when/trade_offs),
+        ``frameworks`` (union of the recommended strategies' compatible_frameworks),
+        ``alternatives`` (fanned-out neighbours), ``filtered_out``, the retrieval
+        envelope (``retrieval_state``/``agent_pattern_state``/``unmatched_signals``/
+        ``dangling``), and ``agent_patterns`` when the agent-pattern leg hydrates.
+        Fail-closed: an abstaining leg contributes empty lists, never a husk.
     """
-    # Recover a lone stray string -> system_description when the caller sent
-    # exactly one extra string and system_description was not supplied.
+    # --- MCP-boundary arg hardening (contract bound by test_tool_hardening.py) ---
+    # Recover a lone stray string -> system_description when the caller sent exactly
+    # one extra string and system_description was not supplied.
     if system_description is _MISSING and extra:
-        stray_strings = [k for k, v in extra.items() if isinstance(v, str)]
+        stray_strings = [key for key, v in extra.items() if isinstance(v, str)]
         if len(extra) == 1 and len(stray_strings) == 1:
             system_description = extra.pop(stray_strings[0])
     if extra:
@@ -180,165 +155,93 @@ def plan_test_strategy(
         )
     if structural_signals is _MISSING:
         raise TypeError(
-            "plan_test_strategy requires 'structural_signals' (a list of "
-            "agent-identified testing signals); refusing to default it to [] "
+            "plan_test_strategy requires 'structural_signals' (the matched signal "
+            "ids recognised against get_signal_index); refusing to default it to [] "
             "as that would mask a caller bug"
         )
 
-    structural_signals = coerce(structural_signals, list, default=[])
-    constraints = coerce(constraints, dict, default={})
+    matched_signal_ids = coerce(structural_signals, list, default=[])
+    constraints = _bounded_constraints(coerce(constraints, dict, default={}))
+    try:
+        k = int(k)
+    except (TypeError, ValueError):
+        k = 10
 
     kb = get_knowledge(conn)
+    # Named ceiling applied where the cost is incurred: bound the caller's id list
+    # BEFORE it reaches hydrate (non-amplifying — the engine's _SEED_CAP bounds the
+    # fan-out downstream of this).
+    seed_ids = matched_signal_ids[:_MAX_MATCHED_SIGNALS]
 
-    # 1. Match structural signals against decision rules
-    matched_rules: list[dict[str, Any]] = []
+    # 1. RETRIEVE strategies via the strategy-signal hydrate seam (four-state envelope).
+    strat = kb.hydrate(seed_ids, k=k)
+
     recommended_strategies: list[dict[str, Any]] = []
     alternatives: list[dict[str, Any]] = []
-
-    if structural_signals:
-        rule_matches = kb.match_structural_signals(structural_signals)
-        for rm in rule_matches:
-            rule = rm["rule"]
-            rec = rm.get("recommended_strategy") or rm.get("recommended_pattern")
-
-            rule_entry: dict[str, Any] = {
-                "signal": rm["signal"],
-                "rule_id": rule["id"],
-                "recommended": rule.get("recommended_strategy", "") or rule.get("recommended_pattern", ""),
-                "description": rule.get("description", ""),
-                "alternatives": [a.get("id", "") for a in rm.get("alternatives", [])],
-            }
-            matched_rules.append(rule_entry)
-
-            # Build recommended strategy from the matched pattern
-            if rec:
-                strategy: dict[str, Any] = {
-                    "strategy_id": rec["id"],
-                    "name": rec.get("name", rec["id"]),
-                    "description": rec.get("description", ""),
-                    "setup_complexity": rec.get("setup_complexity", "medium"),
-                    "languages": rec.get("languages", []),
-                    "frameworks": rec.get("frameworks", []),
-                    "source": "decision_rule",
-                    "rule_id": rule["id"],
-                    "score": 1.0,
-                }
-                recommended_strategies.append(strategy)
-
-            # Collect alternatives
-            for alt in rm.get("alternatives", []):
-                alt_entry: dict[str, Any] = {
-                    "strategy_id": alt["id"],
-                    "name": alt.get("name", alt["id"]),
-                    "description": alt.get("description", ""),
-                    "setup_complexity": alt.get("setup_complexity", "medium"),
-                    "languages": alt.get("languages", []),
-                    "frameworks": alt.get("frameworks", []),
-                    "source": "alternative",
-                    "rule_id": rule["id"],
-                    "score": 0.6,
-                }
-                alternatives.append(alt_entry)
-
-    # 2. Filter by constraints
     filtered_out: list[dict[str, Any]] = []
-    max_complexity = constraints.get("max_setup_complexity")
-    language = constraints.get("language")
-    max_strategies = constraints.get("max_strategies")
-    framework_pref = constraints.get("framework_preference")
-
-    def _apply_filters(
-        strategies: list[dict[str, Any]],
-    ) -> list[dict[str, Any]]:
-        surviving: list[dict[str, Any]] = []
-        for s in strategies:
-            # Complexity filter
-            if max_complexity:
-                sc = s.get("setup_complexity", "medium")
-                if not _complexity_ok(sc, max_complexity):
-                    filtered_out.append({
-                        "strategy_id": s.get("strategy_id", ""),
-                        "name": s.get("name", ""),
-                        "reason": f"setup_complexity '{sc}' exceeds max '{max_complexity}'",
-                    })
-                    continue
-
-            # Language filter
-            if language and not _language_ok(s, language):
-                filtered_out.append({
-                    "strategy_id": s.get("strategy_id", ""),
-                    "name": s.get("name", ""),
-                    "reason": f"language '{language}' not supported",
-                })
-                continue
-
-            # Framework preference — boost score rather than filter
-            if framework_pref:
-                fws = [f.lower() for f in s.get("frameworks", [])]
-                if framework_pref.lower() in fws:
-                    s["score"] = s.get("score", 0.6) + 0.2
-
-            surviving.append(s)
-        return surviving
-
-    recommended_strategies = _apply_filters(recommended_strategies)
-    alternatives = _apply_filters(alternatives)
-
-    # Sort by score descending
-    recommended_strategies.sort(key=lambda s: -s.get("score", 0))
-    alternatives.sort(key=lambda s: -s.get("score", 0))
-
-    # Enforce max_strategies limit
-    if max_strategies and isinstance(max_strategies, int):
-        overflow = recommended_strategies[max_strategies:]
-        recommended_strategies = recommended_strategies[:max_strategies]
-        # Overflow from recommended becomes alternatives
-        for item in overflow:
-            item["source"] = "overflow"
-            item["score"] = max(item.get("score", 0) - 0.1, 0)
-        alternatives = overflow + alternatives
-
-    # 3. Detect agent-specific testing patterns
-    agent_patterns: list[dict[str, Any]] = []
-    detected_agent_signals: list[str] = []
-    for signal in structural_signals:
-        sig_lower = signal.lower()
-        if sig_lower in _AGENT_SIGNALS:
-            detected_agent_signals.append(sig_lower)
-            pattern_info = _AGENT_PATTERNS.get(sig_lower)
-            if pattern_info:
-                agent_patterns.append({
-                    "signal": sig_lower,
-                    **pattern_info,
-                })
-
-    # 4. Collect unique frameworks across all recommended strategies
     frameworks: list[str] = []
-    seen_fw: set[str] = set()
-    for s in recommended_strategies:
-        for fw in s.get("frameworks", []):
-            fw_lower = fw.lower()
-            if fw_lower not in seen_fw:
-                seen_fw.add(fw_lower)
-                frameworks.append(fw)
 
-    # 5. Build result
+    # Fail closed: recognised-but-empty (no_match) or unresolvable (dangling)
+    # abstains structurally — no strategies, no frameworks, never a husk.
+    if strat.state not in (NO_MATCH, DANGLING):
+        # 2. GATE — the ONE constraint gate over each strategy's OWN complexity /
+        #    compatible_frameworks; the excluded set survives with its reason.
+        survivors, removed = kb.filter_by_constraints(list(strat.patterns), constraints)
+        filtered_out = [
+            {
+                "strategy_id": r.get("id", ""),
+                "name": r.get("name", r.get("id", "")),
+                "reason": r.get("filter_reason", ""),
+            }
+            for r in removed
+        ]
+
+        # 3a. REASON — a directly-matched seed is a recommendation; a fanned-out
+        #     neighbour (propagated-only) is an alternative. The retrieval envelope's
+        #     ``seed`` flag is the split, so no arbitrary score threshold is invented.
+        for s in survivors:
+            view = _strategy_view(s)
+            (recommended_strategies if view["retrieval"].get("seed") else alternatives).append(view)
+
+        # 3b. frameworks — union of each recommended strategy's OWN compatible_frameworks
+        #     (was always [] because the old read looked for a phantom ``frameworks`` key).
+        seen_fw: set[str] = set()
+        for view in recommended_strategies:
+            for fw in view["compatible_frameworks"]:
+                key = fw.lower()
+                if key not in seen_fw:
+                    seen_fw.add(key)
+                    frameworks.append(fw)
+
+    # 4. Agent-pattern detection via the pattern-signal hydrate seam (direct-vote-only,
+    #    no fan-out, no fabricated neighbour). Independent of the strategy leg: a caller
+    #    passing only pattern signals still gets patterns, and vice versa.
+    pat = kb.hydrate_patterns(seed_ids, k=k)
+    agent_patterns: list[dict[str, Any]] = []
+    if pat.state not in (NO_MATCH, DANGLING):
+        agent_patterns = [_agent_pattern_view(p) for p in pat.patterns]
+
+    # 5. Envelope (fail-closed visibility). A signal id is unmatched OVERALL only when
+    #    NEITHER view recognised it (intersection); dangling ids from either leg are
+    #    integrity failures worth surfacing (union).
     result: dict[str, Any] = {
-        "matched_rules": matched_rules,
         "recommended_strategies": recommended_strategies,
         "frameworks": frameworks,
         "alternatives": alternatives,
         "filtered_out": filtered_out,
+        "retrieval_state": strat.state,
+        "agent_pattern_state": pat.state,
+        "unmatched_signals": sorted(set(strat.unmatched_signals) & set(pat.unmatched_signals)),
+        "dangling": sorted(set(strat.dangling) | set(pat.dangling)),
     }
-
     if agent_patterns:
         result["agent_patterns"] = agent_patterns
-        result["agent_signals_detected"] = detected_agent_signals
 
     emit_event("plan_test_strategy", {
-        "system_description": system_description[:120],
-        "signals": structural_signals,
-        "matched_rules_count": len(matched_rules),
+        "system_description": system_description[:120] if isinstance(system_description, str) else "",
+        "n_signals": len(matched_signal_ids),
+        "retrieval_state": strat.state,
+        "agent_pattern_state": pat.state,
         "strategies_count": len(recommended_strategies),
         "agent_patterns_count": len(agent_patterns),
         "filtered_out_count": len(filtered_out),

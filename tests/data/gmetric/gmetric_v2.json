@@ -1,0 +1,518 @@
+{
+  "answer_key_sha256": "94907b2999565b92925e9a08cfee9e82ad8183a9473fd84dec9cd135c909f5e8",
+  "collisions": {
+    "collision_count": 4,
+    "collision_texts": [
+      "long conversation sessions",
+      "production reliability requirement",
+      "public-facing ai agent",
+      "rag-based agent with source documents"
+    ],
+    "flat_text_hash_would_collide": 4,
+    "note": "Does any strategy structural_signal TEXT equal any agent_pattern signal TEXT? NON-ZERO here (Theia's was 0), so a flat text-only signal-id space would MERGE these across the two corpora -- which is exactly why S2's get_signal_index must be a NESTED two-view keyed per view (m-5a5837da). The per-kind hash used by this benchmark already keeps them distinct.",
+    "per_kind_hash_collisions": 0
+  },
+  "council": "25d9a8ea / m-6ce2dcc3",
+  "matcher_reachable_ceiling": {
+    "note": "How many vocabulary signals are even bidirectional-substring-reachable through the 45 decision_rules signals the baseline indexes. Measured independently of any recognizer -- so the near-zero pattern reach is the PATH's, not the benchmark's. NB even a 'reachable' pattern signal routes to a STRATEGY, never back to its pattern node, so baseline pattern recall is 0 regardless.",
+    "pattern_reachable_texts": [
+      "RAG agent providing citations",
+      "public-facing AI agent"
+    ],
+    "pattern_signals_reachable": 2,
+    "pattern_signals_total": 60,
+    "rule_signals_indexed": 45,
+    "strategy_reachable_texts": [
+      "API provider verifying backward compatibility before deploy",
+      "API response body format regression detection",
+      "CSS refactoring or design system component visual consistency",
+      "LLM agent with versioned prompts being iterated",
+      "OpenAPI schema defined for API contract compliance",
+      "RAG agent providing citations that must reference real sources",
+      "RAG agent that must ground answers in provided documents",
+      "REST or GraphQL endpoint",
+      "REST or GraphQL endpoint handler with middleware",
+      "UI component rendering",
+      "UI component rendering output stability",
+      "agent handling long conversations near context window capacity",
+      "agent responses streamed via SSE or WebSocket to client",
+      "agent used in automated pipeline where output is parsed by code",
+      "agent with large context injection approaching token limits",
+      "agent with multiple tools and function calling capability",
+      "agent with response time SLA or latency-sensitive interaction",
+      "async function or coroutine",
+      "async function or coroutine with await points",
+      "combinatorial input space with tabular expected outputs",
+      "conversational agent maintaining state across turns",
+      "critical user journey",
+      "critical user journey through the full application",
+      "database queries or ORM operations against a real store",
+      "error handling paths and exception conditions",
+      "event-driven processing",
+      "external service dependency",
+      "finding system breaking point",
+      "finding system breaking point and maximum throughput",
+      "function with many edge cases on same signature",
+      "input space too large to enumerate but universal property exists",
+      "long-running service",
+      "long-running service suspected of memory leaks",
+      "measuring test suite quality beyond code coverage",
+      "microservice API consumed by multiple downstream services",
+      "multi-agent pipeline with sequential handoffs between agents",
+      "payment flow or revenue-critical business process",
+      "public web application requiring WCAG compliance",
+      "public-facing AI agent",
+      "public-facing AI agent needing content safety guardrails",
+      "publish subscribe messaging or event-driven processing",
+      "pure function with no side effects",
+      "pure function with no side effects and clear input output",
+      "rate-limited API endpoint",
+      "rate-limited API endpoint with quota enforcement",
+      "running web application needing runtime vulnerability scan",
+      "serialization roundtrip",
+      "serialization roundtrip or encoding decoding symmetry",
+      "source code handling user input with potential injection",
+      "state-changing API endpoint that must be safely retried",
+      "stateful data structure with ordering or uniqueness invariants",
+      "system exposed to sudden traffic spikes or viral load",
+      "testing isolated function logic with known inputs",
+      "third-party API client",
+      "third-party API client or external service dependency",
+      "third-party dependencies needing CVE monitoring",
+      "verifying SLA compliance under expected load",
+      "web application supporting multiple browsers"
+    ],
+    "strategy_signals_reachable": 58,
+    "strategy_signals_total": 226
+  },
+  "reachable_denominator": {
+    "note": "The full recognition vocabulary that a correct path SHOULD reach. frameworks.json EXCLUDED (a lookup/hydration dimension, not a recognition corpus).",
+    "pattern_signals": 60,
+    "strategy_signals": 226,
+    "total": 286
+  },
+  "reachable_set_map": [
+    {
+      "acceptable_ids": [
+        "sig-f6ec85272a17"
+      ],
+      "canonical": "unit_parameterized:function with many edge cases on same signature",
+      "problem": "P01",
+      "register": "verbatim",
+      "stratum": "S-V",
+      "target": "strategy",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-5b99a824a019"
+      ],
+      "canonical": "unit_parameterized:testing isolated function logic with known inputs",
+      "problem": "P02",
+      "register": "verbatim",
+      "stratum": "S-V",
+      "target": "strategy",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-8a174aea0d0f"
+      ],
+      "canonical": "unit_isolation:pure function with no side effects",
+      "problem": "P03",
+      "register": "verbatim",
+      "stratum": "S-V",
+      "target": "strategy",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-f4ff23117b1f"
+      ],
+      "canonical": "integration_api:REST or GraphQL endpoint",
+      "problem": "P04",
+      "register": "verbatim",
+      "stratum": "S-V",
+      "target": "strategy",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-d2cce3c62d42"
+      ],
+      "canonical": "snapshot_component:UI component rendering",
+      "problem": "P05",
+      "register": "verbatim",
+      "stratum": "S-V",
+      "target": "strategy",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-d6056082f542"
+      ],
+      "canonical": "api_rate_limit:rate-limited API endpoint",
+      "problem": "P06",
+      "register": "verbatim",
+      "stratum": "S-V",
+      "target": "strategy",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-3ea0359143e8"
+      ],
+      "canonical": "unit_isolation:method with injectable dependencies",
+      "problem": "P07",
+      "register": "verbatim",
+      "stratum": "S-V",
+      "target": "strategy",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-f126ec7e824b"
+      ],
+      "canonical": "unit_parameterized:boundary value analysis needed",
+      "problem": "P08",
+      "register": "verbatim",
+      "stratum": "S-V",
+      "target": "strategy",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-57dd272c619f"
+      ],
+      "canonical": "integration_database:transaction rollback behavior",
+      "problem": "P09",
+      "register": "verbatim",
+      "stratum": "S-V",
+      "target": "strategy",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-6f58514a4768"
+      ],
+      "canonical": "api_idempotency:idempotency key handling",
+      "problem": "P10",
+      "register": "verbatim",
+      "stratum": "S-V",
+      "target": "strategy",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-622fb0b73fb2"
+      ],
+      "canonical": "unit_async:async function or coroutine",
+      "problem": "P11",
+      "register": "problem_language",
+      "stratum": "S-PL",
+      "target": "strategy",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-9d5ba906b8b3"
+      ],
+      "canonical": "integration_database:ORM or raw SQL queries",
+      "problem": "P12",
+      "register": "problem_language",
+      "stratum": "S-PL",
+      "target": "strategy",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-015f4540dff5"
+      ],
+      "canonical": "e2e_critical_path:checkout or payment flow",
+      "problem": "P13",
+      "register": "problem_language",
+      "stratum": "S-PL",
+      "target": "strategy",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-bcfce1f4df7a"
+      ],
+      "canonical": "property_based_fuzzing:serialization roundtrip",
+      "problem": "P14",
+      "register": "problem_language",
+      "stratum": "S-PL",
+      "target": "strategy",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-06a61d2652e0"
+      ],
+      "canonical": "load_soak:suspected memory leak",
+      "problem": "P15",
+      "register": "problem_language",
+      "stratum": "S-PL",
+      "target": "strategy",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-82693fc6168f"
+      ],
+      "canonical": "security_dependency_scan:CVE monitoring for dependencies",
+      "problem": "P16",
+      "register": "problem_language",
+      "stratum": "S-PL",
+      "target": "strategy",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-5fa2b92c46b6"
+      ],
+      "canonical": "contract_consumer_driven:microservice consuming another service API",
+      "problem": "P17",
+      "register": "problem_language",
+      "stratum": "S-PL",
+      "target": "strategy",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-c3e73e0ba840"
+      ],
+      "canonical": "mutation_first_order:verifying tests actually catch bugs",
+      "problem": "P18",
+      "register": "problem_language",
+      "stratum": "S-PL",
+      "target": "strategy",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-e5c44d86ddff"
+      ],
+      "canonical": "visual_pixel_diff:CSS refactoring affecting layout",
+      "problem": "P19",
+      "register": "problem_language",
+      "stratum": "S-PL",
+      "target": "strategy",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-1eab1000c605"
+      ],
+      "canonical": "accessibility_wcag_aa:WCAG compliance requirement",
+      "problem": "P20",
+      "register": "problem_language",
+      "stratum": "S-PL",
+      "target": "strategy",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-57c53e569cef"
+      ],
+      "canonical": "prompt_regression:system prompt was modified",
+      "problem": "P21",
+      "register": "verbatim",
+      "stratum": "P-V",
+      "target": "pattern",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-ad50a9325e8e"
+      ],
+      "canonical": "tool_call_validation:agent has access to multiple tools",
+      "problem": "P22",
+      "register": "verbatim",
+      "stratum": "P-V",
+      "target": "pattern",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-28f2cd89467f"
+      ],
+      "canonical": "hallucination_detection:RAG-based agent with source documents",
+      "problem": "P23",
+      "register": "verbatim",
+      "stratum": "P-V",
+      "target": "pattern",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-7589d14411cf"
+      ],
+      "canonical": "safety_guardrail:public-facing AI agent",
+      "problem": "P24",
+      "register": "verbatim",
+      "stratum": "P-V",
+      "target": "pattern",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-280637bb53db"
+      ],
+      "canonical": "context_window_management:long conversation sessions",
+      "problem": "P25",
+      "register": "verbatim",
+      "stratum": "P-V",
+      "target": "pattern",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-ea91515c56e6"
+      ],
+      "canonical": "determinism:production reliability requirement",
+      "problem": "P26",
+      "register": "verbatim",
+      "stratum": "P-V",
+      "target": "pattern",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-788f5e4aa95e"
+      ],
+      "canonical": "stream_validation:agent uses server-sent events",
+      "problem": "P27",
+      "register": "verbatim",
+      "stratum": "P-V",
+      "target": "pattern",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-ea4f34652c4e"
+      ],
+      "canonical": "hallucination_detection:agent invents citations or URLs",
+      "problem": "P28",
+      "register": "verbatim",
+      "stratum": "P-V",
+      "target": "pattern",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-57c53e569cef"
+      ],
+      "canonical": "prompt_regression:system prompt was modified",
+      "problem": "P29",
+      "register": "problem_language",
+      "stratum": "P-PL",
+      "target": "pattern",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-ad50a9325e8e"
+      ],
+      "canonical": "tool_call_validation:agent has access to multiple tools",
+      "problem": "P30",
+      "register": "problem_language",
+      "stratum": "P-PL",
+      "target": "pattern",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-f6a3ee20496d"
+      ],
+      "canonical": "multi_turn_consistency:agent contradicts earlier statements",
+      "problem": "P31",
+      "register": "problem_language",
+      "stratum": "P-PL",
+      "target": "pattern",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-008648919909"
+      ],
+      "canonical": "hallucination_detection:agent makes factual claims",
+      "problem": "P32",
+      "register": "problem_language",
+      "stratum": "P-PL",
+      "target": "pattern",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-76e2bee1e389"
+      ],
+      "canonical": "safety_guardrail:jailbreak attempts in production logs",
+      "problem": "P33",
+      "register": "problem_language",
+      "stratum": "P-PL",
+      "target": "pattern",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-cf8d95b034d6"
+      ],
+      "canonical": "token_budget:large context injection in prompts",
+      "problem": "P34",
+      "register": "problem_language",
+      "stratum": "P-PL",
+      "target": "pattern",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-211c4e74b817"
+      ],
+      "canonical": "latency_profiling:agent has response time SLAs",
+      "problem": "P35",
+      "register": "problem_language",
+      "stratum": "P-PL",
+      "target": "pattern",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [
+        "sig-1628e54f0b81"
+      ],
+      "canonical": "agent_chain_integrity:multiple agents chained in sequence",
+      "problem": "P36",
+      "register": "problem_language",
+      "stratum": "P-PL",
+      "target": "pattern",
+      "verdict": "E"
+    },
+    {
+      "acceptable_ids": [],
+      "canonical": "(none)",
+      "problem": "P_EMPTY",
+      "register": "control",
+      "stratum": "CONTROL",
+      "target": "none",
+      "verdict": "X"
+    }
+  ],
+  "standard": "m-55f6d4da",
+  "story": "story-350b3817",
+  "stratification": {
+    "dims": [
+      "target",
+      "register",
+      "stratum"
+    ],
+    "policy": "PER STRATUM, never a pooled mean (m-e8ccb163). The pooled recall is emitted by grade.py only as pooled_do_not_use.",
+    "strata": [
+      "S-V",
+      "S-PL",
+      "P-V",
+      "P-PL"
+    ]
+  },
+  "version": "v1"
+}

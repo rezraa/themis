@@ -20,7 +20,7 @@ class GraphKnowledgeLoader(KnowledgeLoader):
 
     Read path: delegates to the parent JSON-based KnowledgeLoader (the
     knowledge JSON files are the source of truth for test strategies,
-    agent patterns, decision rules, and frameworks).
+    agent patterns, and frameworks).
 
     Write path: ``write_memory()`` persists records as Memory nodes in the
     Kuzu graph so they can be queried by Othrys and other Titans.

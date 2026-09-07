@@ -29,3 +29,6 @@ Thumbs.db
 # Environment
 .env
 .env.local
+
+# Internal build artifacts (migration proofs, etc.)
+docs/

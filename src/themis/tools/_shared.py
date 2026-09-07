@@ -153,6 +153,35 @@ def emit_event(event_name: str, payload: dict[str, Any]) -> None:
 # Coercion utility — MCP clients sometimes send JSON as strings
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Caller-boundary ceilings — bound unbounded caller input BEFORE it reaches the
+# retrieval engine (the named-ceiling doctrine: declare the ceiling where the cost
+# is incurred). A JUSTIFIED MIRROR of the sibling titans' _shared caps — the
+# titan-decoupling firewall forbids importing coeus.*/mnemos.*, so the constant
+# lives once here, the single Themis source of truth applied by every tool retrofit
+# (S3+). These caps are NON-amplifying: the engine's own _SEED_CAP/_TOPK_CAP bound
+# the fan-out downstream, so they only limit what a single caller can hand in.
+# ---------------------------------------------------------------------------
+
+_MAX_MATCHED_SIGNALS = 256       # cap on caller-supplied signal ids, bound BEFORE hydrate
+_MAX_CONSTRAINTS = 64            # cap on constraint-dict cardinality
+_MAX_CONSTRAINT_VALUE_LEN = 256  # cap on each constraint string value used in comparison
+
+
+def _bounded_constraints(constraints: dict) -> dict:
+    """Bound a caller-supplied constraints dict at the tool boundary.
+
+    Keeps at most ``_MAX_CONSTRAINTS`` entries and clips each string value to
+    ``_MAX_CONSTRAINT_VALUE_LEN`` characters, so an unbounded dict cannot amplify
+    the downstream comparison cost. Non-string values pass through unchanged
+    (numeric/bool constraints are already O(1) to compare).
+    """
+    bounded: dict = {}
+    for key, val in list(constraints.items())[:_MAX_CONSTRAINTS]:
+        bounded[key] = val[:_MAX_CONSTRAINT_VALUE_LEN] if isinstance(val, str) else val
+    return bounded
+
+
 def coerce(val: Any, expected_type: type | None = None, default: Any = None) -> Any:
     """Coerce MCP-supplied values to a native type, else return *default*.
 
