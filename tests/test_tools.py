@@ -17,19 +17,14 @@ class TestPlanTestStrategy:
 
     Callers now pass the SIGNAL IDS recognised against get_signal_index (not prose);
     the tool hydrates them into strategies + agent patterns and reasons over each
-    node's OWN fields. Ids are drawn from the accessor's own output (Directive 8).
+    node's OWN fields. Ids are drawn from the accessor's own output (the
+    ``accessor_ids`` fixture, Directive 8).
     """
 
-    def _strategy_ids(self, strategy_id: str, n: int = 2) -> list[str]:
-        from themis.tools.get_signal_index import get_signal_index
-        idx = get_signal_index()
-        return [e["signal_id"] for e in idx["strategy_signals"]
-                if strategy_id in e["strategy_ids"]][:n]
-
-    def test_matches_unit_test_signals(self):
+    def test_matches_unit_test_signals(self, accessor_ids):
         result = plan_test_strategy(
             system_description="Pure function that validates email addresses",
-            matched_signal_ids=self._strategy_ids("unit_isolation"),
+            matched_signal_ids=accessor_ids["strategy"],
         )
         assert result["retrieval_state"] in ("hit", "low_confidence")
         assert any(r["strategy_id"] == "unit_isolation"
@@ -39,26 +34,23 @@ class TestPlanTestStrategy:
                   if r["strategy_id"] == "unit_isolation")
         assert ui["applies_when"] and ui["avoid_when"] and ui["trade_offs"]
 
-    def test_returns_strategies_and_frameworks(self):
+    def test_returns_strategies_and_frameworks(self, accessor_ids):
         result = plan_test_strategy(
             system_description="REST API with database",
-            matched_signal_ids=self._strategy_ids("unit_isolation"),
+            matched_signal_ids=accessor_ids["strategy"],
         )
         assert "recommended_strategies" in result
         assert "frameworks" in result
         assert result["frameworks"]  # union of the strategies' compatible_frameworks
 
-    def test_detects_agent_patterns(self):
-        from themis.tools.get_signal_index import get_signal_index
-        idx = get_signal_index()
-        pat = idx["pattern_signals"][0]
+    def test_detects_agent_patterns(self, accessor_ids):
         result = plan_test_strategy(
             system_description="AI agent that calls tools and generates responses",
-            matched_signal_ids=[pat["signal_id"]],
+            matched_signal_ids=[accessor_ids["pattern"]],
         )
         assert "agent_patterns" in result
         got = {p["pattern_id"] for p in result["agent_patterns"]}
-        assert set(pat["pattern_ids"]) <= got
+        assert set(accessor_ids["pattern_ids"]) <= got
         # Rich corpus fields the deleted island never carried.
         block = result["agent_patterns"][0]
         assert block["test_approach"] and block["metrics"] and block["severity"]
@@ -72,10 +64,10 @@ class TestPlanTestStrategy:
         assert result["recommended_strategies"] == []
         assert result["retrieval_state"] == "no_match"
 
-    def test_constraints_filter(self):
+    def test_constraints_filter(self, accessor_ids):
         result = plan_test_strategy(
             system_description="Fast API endpoint",
-            matched_signal_ids=self._strategy_ids("unit_isolation"),
+            matched_signal_ids=accessor_ids["strategy"],
             constraints={"max_setup": "low"},
         )
         # Constraint gate reads each strategy's OWN nested complexity.

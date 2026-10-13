@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import ast
 import dataclasses as dc
+import json
 import sys
 from pathlib import Path
 
@@ -69,12 +70,12 @@ class TestImportFirewall:
 # Semantic-parity drift test (test-only, skip-guarded)
 # ==========================================================================
 
-def _load_sibling():
-    """Import a sibling engine (mnemos preferred, coeus/theia fallback), adding the
-    sibling ``../<name>/src`` if needed. Test-only path injection — never a shipping
-    dep. Returns the module or None (caller skips)."""
+def _load_sibling(names: tuple[str, ...] = ("mnemos", "coeus", "theia")):
+    """Import the first importable sibling engine among *names*, adding the sibling
+    ``../<name>/src`` if needed. Test-only path injection — never a shipping dep.
+    Returns the module or None (caller skips)."""
     repos = _SRC.parents[1]  # .../<repos>  (themis/src -> themis -> <repos>)
-    for name in ("mnemos", "coeus", "theia"):
+    for name in names:
         try:
             return __import__(f"{name}.knowledge.loader", fromlist=["loader"])
         except ImportError:
@@ -86,6 +87,13 @@ def _load_sibling():
                 except ImportError:
                     continue
     return None
+
+
+# The retrieval block every engine emits. A sibling whose ``hydrate`` takes caller
+# constraints adds its trait-fit tie-break key; this engine's ``hydrate`` takes none,
+# so it emits the vote keys alone. Any other sibling key is drift.
+_VOTE_KEYS = {"score", "direct_votes", "propagated_votes", "seed"}
+_TRAIT_FIT_KEYS = {"use_when_fit"}
 
 
 class TestMirrorParity:
@@ -121,15 +129,6 @@ class TestMirrorParity:
             with pytest.raises(TypeError):
                 frozen["a"] = 1
 
-    def test_facet_primitives_parity(self, s) -> None:
-        cases = ["1-5", "3", "50+", "garbage", ""]
-        assert [t._parse_team_range(x) for x in cases] == [s._parse_team_range(x) for x in cases]
-        facet, cons = {"team_size": "1-10", "scale": "startup"}, {"team_size": "3", "scale": "startup"}
-        assert t.facet_matches(facet, cons) == s.facet_matches(facet, cons) is True
-        assert t.facet_matches(facet, {"team_size": "3"}) == s.facet_matches(facet, {"team_size": "3"}) is False
-        mixed = ["free text", {"team_size": "1-5"}]
-        assert t.split_conditions(mixed) == s.split_conditions(mixed)
-
     def test_hydrate_envelope_contract_parity(self, s) -> None:
         """Behavioural parity of the OUTPUT CONTRACT: the sibling's engine on its
         corpus and Themis's on the strategy corpus emit the same-shaped envelope
@@ -144,7 +143,45 @@ class TestMirrorParity:
         assert tr.state in (t.HIT, t.LOW_CONFIDENCE) and sr.state in (s.HIT, s.LOW_CONFIDENCE)
         assert type(tr).__name__ == type(sr).__name__ == "RetrievalResult"
         if tr.patterns and sr.patterns:
-            assert set(tr.patterns[0]["retrieval"]) == set(sr.patterns[0]["retrieval"]) == \
-                   {"score", "direct_votes", "propagated_votes", "seed"}
+            assert set(tr.patterns[0]["retrieval"]) == _VOTE_KEYS
+            assert _VOTE_KEYS <= set(sr.patterns[0]["retrieval"]) <= _VOTE_KEYS | _TRAIT_FIT_KEYS
             assert isinstance(tr.votes[tr.patterns[0]["id"]], int)
             assert isinstance(sr.votes[sr.patterns[0]["id"]], int)
+
+
+class TestCoeusReferenceParity:
+    """Primitives whose reference is Coeus specifically: the key-named facet
+    predicates, and ``compact_signal_view``, which mirrors Coeus byte-for-byte
+    (council 1e970338) so readers invert every Titan's view with one flatten."""
+
+    @pytest.fixture(scope="class")
+    def c(self):
+        coeus = _load_sibling(("coeus",))
+        if coeus is None:
+            pytest.skip("coeus reference not importable — drift test skip-guarded")
+        return coeus
+
+    def test_facet_primitives_parity(self, c) -> None:
+        """Coeus is the facet reference: its predicate dispatches on the key name, as
+        this mirror does. Mnemos dispatches on a catalogue kind instead, so it is not
+        comparable call-for-call."""
+        cases = ["1-5", "3", "50+", "garbage", ""]
+        assert [t._parse_team_range(x) for x in cases] == [c._parse_team_range(x) for x in cases]
+        facet, cons = {"team_size": "1-10", "scale": "startup"}, {"team_size": "3", "scale": "startup"}
+        assert t.facet_matches(facet, cons) == c.facet_matches(facet, cons) is True
+        assert t.facet_matches(facet, {"team_size": "3"}) == c.facet_matches(facet, {"team_size": "3"}) is False
+        mixed = ["free text", {"team_size": "1-5"}]
+        assert t.split_conditions(mixed) == c.split_conditions(mixed)
+
+    def test_compact_signal_view_parity(self, c) -> None:
+        """On a synthetic view with a multi-owner signal and unsorted input, on both of
+        Themis's own loader views with their own owner keys, and on an empty view."""
+        synthetic = [
+            {"signal_id": "s3", "signal_text": "three", "strategy_ids": ["z", "a"]},
+            {"signal_id": "s1", "signal_text": "one", "strategy_ids": ["z"]},
+            {"signal_id": "s2", "signal_text": "two", "strategy_ids": ["a", "m"]},
+        ]
+        kb = t.KnowledgeLoader()
+        for view, id_key in ((synthetic, "strategy_ids"), (kb.get_signal_index(), "strategy_ids"),
+                             (kb.get_pattern_signal_index(), "pattern_ids"), ([], "pattern_ids")):
+            assert json.dumps(t.compact_signal_view(view, id_key)) ==                    json.dumps(c.compact_signal_view(view, id_key))

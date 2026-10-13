@@ -6,6 +6,7 @@ from __future__ import annotations
 import pytest
 
 from themis.tools._shared import get_knowledge
+from themis.tools.get_signal_index import get_signal_index
 
 
 @pytest.fixture()
@@ -17,6 +18,20 @@ def knowledge():
     mock the loader internals.
     """
     return get_knowledge(conn=None)
+
+
+@pytest.fixture(scope="session")
+def accessor_ids() -> dict:
+    """Signal ids drawn from the LIVE accessor (never a hand fixture): the first two
+    strategy signals owned by ``unit_isolation`` + the lowest-id agent-pattern signal
+    with every pattern that owns it."""
+    idx = get_signal_index()
+    strat = list(idx["strategy_signals"]["unit_isolation"])[:2]
+    assert len(strat) == 2, "corpus should expose >=2 signals for unit_isolation"
+    patterns = idx["pattern_signals"]
+    pat = min(sid for signals in patterns.values() for sid in signals)
+    return {"strategy": strat, "pattern": pat,
+            "pattern_ids": [pid for pid, signals in patterns.items() if pat in signals]}
 
 
 @pytest.fixture()

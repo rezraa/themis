@@ -225,6 +225,28 @@ def is_gated(node: dict, constraints: dict) -> bool:
     return any(facet_matches(f, constraints) for f in facets)
 
 
+def compact_signal_view(view: list[dict], id_key: str) -> dict[str, dict[str, str]]:
+    """Project a loader signal-index *view* into the compact recognition shape.
+
+    *view* is a ``get_signal_index()`` / ``get_pattern_signal_index()`` list of
+    ``{signal_id, signal_text, <id_key>}`` entries; *id_key* names that view's
+    owner-id list (``strategy_ids`` / ``pattern_ids``). Returns
+    ``{owner_id: {signal_id: signal_text}}`` with owners and each owner's signals in
+    sorted id order, so the result is a pure function of the view's content (not its
+    order) and serialises to the same bytes on every call. A signal with several
+    owners appears under each of them.
+
+    Mirrors the reference ``coeus.knowledge.loader.compact_signal_view``: readers
+    invert every Titan's view with one flatten, so the shape must be identical across
+    Titans (held by the parity case in tests/test_firewall.py).
+    """
+    grouped: dict[str, dict[str, str]] = {}
+    for entry in view:
+        for owner in entry[id_key]:
+            grouped.setdefault(owner, {})[entry["signal_id"]] = entry["signal_text"]
+    return {owner: dict(sorted(grouped[owner].items())) for owner in sorted(grouped)}
+
+
 @dataclass
 class _NamedIndex:
     """Descriptor for ONE signal-index corpus the parameterized engine serves.

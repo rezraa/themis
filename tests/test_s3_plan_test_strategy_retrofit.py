@@ -27,21 +27,8 @@ from pathlib import Path
 
 import pytest
 
-from themis.tools.get_signal_index import get_signal_index
 from themis.tools.plan_test_strategy import plan_test_strategy
 from themis.tools._shared import get_knowledge
-
-
-@pytest.fixture(scope="module")
-def accessor_ids() -> dict:
-    """Signal ids drawn from the LIVE accessor: two strategy signals that map to a
-    rule-recommended strategy (``unit_isolation``) + one agent-pattern signal."""
-    idx = get_signal_index()
-    strat = [e["signal_id"] for e in idx["strategy_signals"]
-             if "unit_isolation" in e["strategy_ids"]][:2]
-    pat = idx["pattern_signals"][0]
-    assert len(strat) == 2, "corpus should expose >=2 signals for unit_isolation"
-    return {"strategy": strat, "pattern": pat["signal_id"], "pattern_ids": pat["pattern_ids"]}
 
 
 class TestOwnFieldReasoning:

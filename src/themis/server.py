@@ -54,9 +54,10 @@ def get_signal_index(conn: Any = None) -> dict:
         conn: Kuzu/LadybugDB connection for graph mode (injected by Othrys). None ->
             the JSON singleton loader.
 
-    Returns: {strategy_signals: [{signal_id, signal_text, strategy_ids}],
-              pattern_signals: [{signal_id, signal_text, pattern_ids}]} — each view
-              sorted by signal_id with sorted id-lists (byte-stable).
+    Returns: {strategy_signals: {strategy_id: {signal_id: signal_text}},
+              pattern_signals: {pattern_id: {signal_id: signal_text}}} — owners and
+              their signals in sorted id order (byte-stable); a signal owned by
+              several nodes appears under each.
     """
     return _get_signal_index(conn=conn)
 

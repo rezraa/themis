@@ -26,7 +26,6 @@ import json
 from pathlib import Path
 
 from themis.knowledge.loader import KnowledgeLoader
-from themis.tools.get_signal_index import get_signal_index
 from themis.tools.plan_test_strategy import plan_test_strategy
 
 REPO = Path(__file__).resolve().parents[1]
@@ -80,14 +79,10 @@ class TestZeroReferencesNoShim:
 
 
 class TestPlanTestStrategyContract:
-    def test_matched_rules_dropped(self):
-        idx = get_signal_index()
-        strat = [e["signal_id"] for e in idx["strategy_signals"]
-                 if "unit_isolation" in e["strategy_ids"]][:2]
-        assert len(strat) == 2
+    def test_matched_rules_dropped(self, accessor_ids):
         res = plan_test_strategy(
             system_description="a pure function under test",
-            matched_signal_ids=strat,
+            matched_signal_ids=accessor_ids["strategy"],
         )
         assert "matched_rules" not in res
         # Retrieval still reasons over each node's OWN fields (unchanged from S3).

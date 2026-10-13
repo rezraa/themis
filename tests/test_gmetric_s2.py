@@ -213,19 +213,103 @@ class TestDeterminismAndControl:
 
 
 # ==========================================================================
-# The filed nested two-view accessor (AC) + round-trip
+# The filed nested two-view accessor (AC) — compact, lossless, byte-stable
 # ==========================================================================
+# Each group is the compact projection (council 1e970338) of its own loader view:
+# ``{owner_id: {signal_id: signal_text}}``, projected with that view's own owner key.
+
+_GROUPS = {  # group -> (owner-id key, loader view, hydrate over that view)
+    "strategy_signals": ("strategy_ids", KnowledgeLoader.get_signal_index,
+                         lambda kb, ids: kb.hydrate(ids, k=50, fan_out=False)),
+    "pattern_signals": ("pattern_ids", KnowledgeLoader.get_pattern_signal_index,
+                        lambda kb, ids: kb.hydrate_patterns(ids, k=50)),
+}
+
+
+def _triples_of_compact(group: dict) -> set:
+    return {(sid, text, owner) for owner, signals in group.items() for sid, text in signals.items()}
+
 
 class TestAccessor:
     def test_get_signal_index_nested_two_view_shape(self) -> None:
         from themis.tools.get_signal_index import get_signal_index
         idx = get_signal_index()
-        assert set(idx) == {"strategy_signals", "pattern_signals"}
-        for e in idx["strategy_signals"]:
-            assert set(e) == {"signal_id", "signal_text", "strategy_ids"}
-        for e in idx["pattern_signals"]:
-            assert set(e) == {"signal_id", "signal_text", "pattern_ids"}
-        assert len(idx["strategy_signals"]) == 226 and len(idx["pattern_signals"]) == 60
+        assert set(idx) == set(_GROUPS)
+        for group in idx.values():
+            for owner, signals in group.items():
+                assert isinstance(owner, str) and isinstance(signals, dict) and signals
+                assert all(isinstance(k, str) and isinstance(v, str) for k, v in signals.items())
+        distinct = {g: len({sid for sigs in idx[g].values() for sid in sigs}) for g in idx}
+        assert distinct == {"strategy_signals": 226, "pattern_signals": 60}
+
+    @pytest.mark.parametrize("group", sorted(_GROUPS))
+    def test_round_trip_preserves_every_triple(self, group) -> None:
+        """Flattening a group gives exactly its loader view's (signal_id, signal_text,
+        owner) triples — nothing dropped, nothing invented."""
+        from themis.tools.get_signal_index import get_signal_index
+        id_key, view_of, _ = _GROUPS[group]
+        view = view_of(KnowledgeLoader(knowledge_dir=grade.KDIR))
+        assert _triples_of_compact(get_signal_index()[group]) ==             {(e["signal_id"], e["signal_text"], o) for e in view for o in e[id_key]}
+
+    @pytest.mark.parametrize("group", sorted(_GROUPS))
+    def test_loader_view_is_exactly_recoverable(self, group) -> None:
+        """Inverting a group rebuilds its loader view entry-for-entry — same order, same
+        sorted owner lists — not merely the same set of triples."""
+        from themis.tools.get_signal_index import get_signal_index
+        id_key, view_of, _ = _GROUPS[group]
+        rebuilt: dict[str, dict] = {}
+        for owner, signals in get_signal_index()[group].items():
+            for sid, text in signals.items():
+                rebuilt.setdefault(sid, {"signal_id": sid, "signal_text": text, id_key: []})[id_key].append(owner)
+        assert [rebuilt[sid] for sid in sorted(rebuilt)] == view_of(KnowledgeLoader(knowledge_dir=grade.KDIR))
+
+    @pytest.mark.parametrize("group", sorted(_GROUPS))
+    def test_every_served_id_hydrates_to_its_owner(self, group) -> None:
+        """AC proof: every owner's served signal ids round-trip through that view's
+        hydrate to the owner."""
+        from themis.tools.get_signal_index import get_signal_index
+        _, _, hydrate = _GROUPS[group]
+        kb = KnowledgeLoader(knowledge_dir=grade.KDIR)
+        for owner, signals in get_signal_index()[group].items():
+            assert owner in {p["id"] for p in hydrate(kb, list(signals)).patterns}
+
+    def test_tool_is_the_mirrored_projection(self) -> None:
+        """The tool adds nothing beyond the one projection the parity case binds."""
+        from themis.knowledge.loader import compact_signal_view
+        from themis.tools.get_signal_index import get_signal_index
+        kb = KnowledgeLoader()
+        assert get_signal_index() == {
+            g: compact_signal_view(view_of(kb), id_key) for g, (id_key, view_of, _) in _GROUPS.items()}
+
+    def test_smaller_than_the_loader_views(self) -> None:
+        from themis.tools.get_signal_index import get_signal_index
+        kb = KnowledgeLoader()
+        full = json.dumps({g: view_of(kb) for g, (_, view_of, _) in _GROUPS.items()}, ensure_ascii=False)
+        assert len(json.dumps(get_signal_index(), ensure_ascii=False)) < 0.6 * len(full)
+
+    def test_owners_and_signals_in_sorted_id_order(self) -> None:
+        from themis.tools.get_signal_index import get_signal_index
+        for group in get_signal_index().values():
+            assert list(group) == sorted(group)
+            for signals in group.values():
+                assert list(signals) == sorted(signals)
+
+    def test_byte_identical_across_calls_and_pythonhashseed(self) -> None:
+        """No ``sort_keys``: the emitted order itself is deterministic, in-process and
+        across processes — a cacheable prefix."""
+        from themis.tools.get_signal_index import get_signal_index
+        assert len({json.dumps(get_signal_index()) for _ in range(3)}) == 1
+        snippet = ("import json,hashlib;"
+                   "from themis.tools.get_signal_index import get_signal_index as g;"
+                   "print(hashlib.sha256(json.dumps(g()).encode()).hexdigest())")
+        outs = set()
+        for seed in ("0", "1"):
+            r = subprocess.run([PY, "-c", snippet], stdin=subprocess.DEVNULL, capture_output=True, text=True,
+                               env={**os.environ, "PYTHONPATH": str(REPO / "src"), "PYTHONHASHSEED": seed},
+                               timeout=120)
+            assert r.returncode == 0, r.stderr
+            outs.add(r.stdout.strip())
+        assert len(outs) == 1, f"compact view bytes moved across PYTHONHASHSEED: {outs}"
 
     def test_one_public_function_in_the_tool_module(self) -> None:
         """AC: filename == function; exactly ONE public top-level function (the Othrys
@@ -235,19 +319,6 @@ class TestAccessor:
                    if not n.startswith("_") and callable(getattr(mod, n))
                    and getattr(getattr(mod, n), "__module__", None) == mod.__name__]
         assert publics == ["get_signal_index"]
-
-    def test_real_signal_id_round_trips_through_hydrate(self) -> None:
-        """AC proof: a real signal_id from the live accessor round-trips through hydrate
-        to its node — on BOTH views."""
-        from themis.tools.get_signal_index import get_signal_index
-        kb = KnowledgeLoader(knowledge_dir=grade.KDIR)
-        idx = get_signal_index()
-        se = idx["strategy_signals"][0]
-        sr = kb.hydrate([se["signal_id"]], k=10)
-        assert set(se["strategy_ids"]) <= {p["id"] for p in sr.patterns}
-        pe = idx["pattern_signals"][0]
-        pr = kb.hydrate_patterns([pe["signal_id"]], k=10)
-        assert set(pe["pattern_ids"]) <= {p["id"] for p in pr.patterns}
 
     def test_cross_link_references_existing_pattern_ids(self) -> None:
         """AC: agent-category strategies cross-link to their twin agent_patterns by
